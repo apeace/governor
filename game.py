@@ -16,6 +16,8 @@ PHASES = [
     PHASE_KINGS_ENVOY, PHASE_FALL, PHASE_RECRUIT_SOLDIERS, PHASE_WINTER
 ]
 
+MAX_PHASE = len(PHASES) - 1
+
 PRODUCTIVE_SEASONS = [
     PHASE_SPRING, PHASE_SUMMER, PHASE_FALL
 ]
@@ -32,8 +34,16 @@ class GameState(object):
         if state.year == MAX_YEAR:
             state.over = True
         else:
-            state.year = state.year + 1
+            state.year += 1
         return state
 
-    def nextSeason(self):
+    def nextPhase(self):
         state = copy.deepcopy(self)
+        if state.phase == MAX_PHASE:
+            state = state.nextYear()
+            if not state.over:
+                state.phase = 0
+            return state
+        else:
+            state.phase += 1
+            return state
