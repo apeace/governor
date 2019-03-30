@@ -31,24 +31,52 @@ class Game():
         self.state = state
 
     def play(self):
+        """
+        Play through an entire game from start to finish.
+        """
         self.setup()
         while True:
-            msg = []
-
-            self.state = self.state.nextPhase()
-            msg.append("Next phase")
-
-            if self.state.over:
+            over = self.tick()
+            if over:
                 break
-
-            self.engine.tick(self.state, message=msg)
-
         self.engine.over(self.state)
 
     def setup(self):
-        if len(self.state.players) == 0:
-            self.state.setPlayers(self.engine.getPlayers())
+        """
+        Setup game state for the start of the game.
+        """
+        self.state.setPlayers(self.engine.getPlayers())
         self.engine.start(self.state)
+
+    def tick(self):
+        """
+        Advance to the next tick of the game.
+        """
+        msg = []
+
+        if self.state.last_phase_played == self.state.phase:
+            self.state = self.state.nextPhase()
+            if self.state.over:
+                return True
+            self.engine.tick(self.state, "Next phase")
+            return False
+
+        if PHASES[self.state.phase] == PHASE_KINGS_FAVOR:
+            self.kingsFavor()
+
+        return False
+
+    def kingsFavor(self):
+        """
+        Phase 1: The King's Favor
+        The player with the fewest buildings gets a bonus die.
+        If there is a tie for fewest buildings, the player with
+        the fewest resources gets a bonus die. If there is a tie
+        for fewest resources, each player chooses one free resource.
+        """
+        input("Kings favor stuff")
+        self.state = self.state.phaseComplete(PHASE_KINGS_FAVOR)
+
 
 class State():
     """
@@ -59,6 +87,7 @@ class State():
         self.over = False
         self.year = 1
         self.phase = 0
+        self.last_phase_played = -1
 
     def setPlayers(self, playerNames):
         self.players = [PlayerState(name) for name in playerNames]
@@ -81,6 +110,13 @@ class State():
         else:
             state.phase += 1
             return state
+
+    def phaseComplete(self, phase):
+        if phase != PHASES[self.phase]:
+            raise Exception("Completed the wrong phase")
+        state = copy.deepcopy(self)
+        state.last_phase_played = self.phase
+        return state
 
 class PlayerState():
     """
