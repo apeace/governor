@@ -6,7 +6,6 @@ class Logger():
     """
     Logs game state.
     """
-
     def startLog(self):
         print("")
         self.divider()
@@ -29,7 +28,9 @@ class Logger():
 
     def start(self, state):
         self.startLog()
-        print("Players: " + str(state.players))
+        print("Players: " + str([player.name for player in state.players]))
+        print("Year: " + str(state.year))
+        print("Phase: " + game.PHASES[state.phase] + " (" + str(state.phase) + ")")
         self.endLog()
 
     def over(self, state):
@@ -41,7 +42,6 @@ class Engine():
     """
     Provides a means to advance through game states.
     """
-
     def __init__(self, logger):
         self.logger = logger
 
@@ -70,7 +70,6 @@ class CliEngine(Engine):
     """
     Play the game via CLI.
     """
-
     def wait(self):
         input("")
 

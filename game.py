@@ -26,7 +26,6 @@ class Game():
     """
     Plays through a game, using inputs from an Engine.
     """
-
     def __init__(self, engine, state):
         self.engine = engine
         self.state = state
@@ -48,19 +47,21 @@ class Game():
 
     def setup(self):
         if len(self.state.players) == 0:
-            self.state.players = self.engine.getPlayers()
+            self.state.setPlayers(self.engine.getPlayers())
         self.engine.start(self.state)
 
 class State():
     """
     Tracks state of a game and implements state transitions.
     """
-
     def __init__(self):
         self.players = []
         self.over = False
         self.year = 1
         self.phase = 0
+
+    def setPlayers(self, playerNames):
+        self.players = [PlayerState(name) for name in playerNames]
 
     def nextYear(self):
         state = copy.deepcopy(self)
@@ -80,3 +81,15 @@ class State():
         else:
             state.phase += 1
             return state
+
+class PlayerState():
+    """
+    Tracks the state of an individual player.
+    """
+    def __init__(self, name):
+        self.name = name
+        self.bonusDie = False
+        self.buildings = []
+        self.gold = 0
+        self.stone = 0
+        self.wood = 0
