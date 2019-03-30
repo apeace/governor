@@ -1,3 +1,5 @@
+import collections
+
 import game
 
 class Logger():
@@ -15,8 +17,12 @@ class Logger():
     def divider(self):
         print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
 
-    def log(self, state):
+    def log(self, state, message=None):
         self.startLog()
+        if isinstance(message, str):
+            print("> " + message)
+        elif isinstance(message, collections.Iterable):
+            print("\n".join(["> " + m for m in message]))
         print("Year: " + str(state.year))
         print("Phase: " + game.PHASES[state.phase] + " (" + str(state.phase) + ")")
         self.endLog()
@@ -51,11 +57,11 @@ class Engine():
         """
         self.logger.over(state)
 
-    def tick(self, state):
+    def tick(self, state, message=None):
         """
         Let the engine know the game has ticked.
         """
-        self.logger.log(state)
+        self.logger.log(state, message=message)
 
     def getPlayers(self):
         raise NotImplementedError
@@ -72,8 +78,8 @@ class CliEngine(Engine):
         super().start(state)
         self.wait()
 
-    def tick(self, state):
-        super().tick(state)
+    def tick(self, state, message=None):
+        super().tick(state, message=message)
         self.wait()
 
     def getPlayers(self):

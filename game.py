@@ -34,10 +34,16 @@ class Game():
     def play(self):
         self.setup()
         while True:
+            msg = []
+
             self.state = self.state.nextPhase()
+            msg.append("Next phase")
+
             if self.state.over:
                 break
-            self.engine.tick(self.state)
+
+            self.engine.tick(self.state, message=msg)
+
         self.engine.over(self.state)
 
     def setup(self):
