@@ -33,8 +33,10 @@ class Game():
 
     def play(self):
         self.setup()
-        while not self.state.over:
+        while True:
             self.state = self.state.nextPhase()
+            if self.state.over:
+                break
             self.engine.tick(self.state)
         self.engine.over(self.state)
 
