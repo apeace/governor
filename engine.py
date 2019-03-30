@@ -11,7 +11,6 @@ class Logger():
 
     def endLog(self):
         self.divider()
-        print("")
 
     def divider(self):
         print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
@@ -65,6 +64,17 @@ class CliEngine(Engine):
     """
     Play the game via CLI.
     """
+
+    def wait(self):
+        input("")
+
+    def start(self, state):
+        super().start(state)
+        self.wait()
+
+    def tick(self, state):
+        super().tick(state)
+        self.wait()
 
     def getPlayers(self):
         players = []
