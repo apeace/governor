@@ -1,15 +1,15 @@
 import game
 
-class Logger(object):
+class Logger():
     """
     Logs game state.
     """
 
-    def start(self):
+    def startLog(self):
         print("")
         self.divider()
 
-    def end(self):
+    def endLog(self):
         self.divider()
         print("")
 
@@ -17,15 +17,20 @@ class Logger(object):
         print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
 
     def log(self, state):
-        self.start()
+        self.startLog()
         print("Year: " + str(state.year))
         print("Phase: " + game.PHASES[state.phase] + " (" + str(state.phase) + ")")
-        self.end()
+        self.endLog()
+
+    def start(self, state):
+        self.startLog()
+        print("Players: " + str(state.players))
+        self.endLog()
 
     def over(self, state):
-        self.start()
+        self.startLog()
         print("Game over!")
-        self.end()
+        self.endLog()
 
 class Engine():
     """
@@ -34,17 +39,24 @@ class Engine():
 
     def __init__(self, logger):
         self.logger = logger
-        self.state = game.State()
 
-    def play(self):
-        self.setup()
-        while not self.state.over:
-            self.state = self.state.nextPhase()
-            self.logger.log(self.state)
-        self.logger.over(self.state)
+    def start(self, state):
+        """
+        Let the engine know the game is starting.
+        """
+        self.logger.start(state)
 
-    def setup(self):
-        self.state.players = self.getPlayers()
+    def over(self, state):
+        """
+        Let the engine know the game is over.
+        """
+        self.logger.over(state)
+
+    def tick(self, state):
+        """
+        Let the engine know the game has ticked.
+        """
+        self.logger.log(state)
 
     def getPlayers(self):
         raise NotImplementedError

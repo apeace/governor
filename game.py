@@ -22,9 +22,30 @@ PRODUCTIVE_SEASONS = [
     PHASE_SPRING, PHASE_SUMMER, PHASE_FALL
 ]
 
-class State(object):
+class Game():
     """
-    Tracks state of a game and implements game rules.
+    Plays through a game, using inputs from an Engine.
+    """
+
+    def __init__(self, engine, state):
+        self.engine = engine
+        self.state = state
+
+    def play(self):
+        self.setup()
+        while not self.state.over:
+            self.state = self.state.nextPhase()
+            self.engine.tick(self.state)
+        self.engine.over(self.state)
+
+    def setup(self):
+        if len(self.state.players) == 0:
+            self.state.players = self.engine.getPlayers()
+        self.engine.start(self.state)
+
+class State():
+    """
+    Tracks state of a game and implements state transitions.
     """
 
     def __init__(self):
