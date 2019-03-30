@@ -34,3 +34,6 @@ class GameState(object):
         else:
             state.year = state.year + 1
         return state
+
+    def nextSeason(self):
+        state = copy.deepcopy(self)
