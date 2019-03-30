@@ -22,9 +22,13 @@ PRODUCTIVE_SEASONS = [
     PHASE_SPRING, PHASE_SUMMER, PHASE_FALL
 ]
 
-class GameState(object):
+class State(object):
+    """
+    Tracks state of a game and implements game rules.
+    """
 
     def __init__(self):
+        self.players = []
         self.over = False
         self.year = 1
         self.phase = 0

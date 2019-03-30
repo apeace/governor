@@ -1,7 +1,7 @@
 import game
 
 def test_next_year():
-    state = game.GameState()
+    state = game.State()
     newState = state.nextYear()
     assert state.year == 1
     assert newState.year == 2
@@ -11,7 +11,7 @@ def test_next_year():
     assert newState.over
 
 def test_next_phase():
-    state = game.GameState()
+    state = game.State()
     newState = state.nextPhase()
     assert newState.year == 1
     assert newState.phase == 1
