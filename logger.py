@@ -42,8 +42,6 @@ class StdoutLogger(Logger):
             print("> " + message)
         elif isinstance(message, collections.Iterable) and len(message) > 0:
             print("\n".join(["> " + m for m in message]))
-        print("Year: " + str(state.year))
-        print("Phase: " + kingsburg.PHASES[state.phase] + " (" + str(state.phase) + ")")
         self.endLog()
 
     def start(self, state):

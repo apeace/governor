@@ -139,10 +139,9 @@ class State():
             state = state.nextYear()
             if not state.over:
                 state.phase = 0
-            return state
         else:
             state.phase += 1
-            return state
+        return state.message("Transitioning to year: " + str(state.year) + ", phase: " + PHASES[state.phase])
 
     def phaseComplete(self, phase: Phase) -> State:
         if phase != PHASES[self.phase]:

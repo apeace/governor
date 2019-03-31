@@ -35,11 +35,16 @@ class Game():
             self.state = self.state.nextPhase()
             if self.state.over:
                 return True
-            self.engine.tick(self.state, "Next phase")
+            messages = self.state.messages
+            self.state = self.state.clearMessages()
+            self.engine.tick(self.state, messages)
             return False
 
-        if kingsburg.PHASES[self.state.phase] == kingsburg.PHASE_KINGS_FAVOR:
+        phase = kingsburg.PHASES[self.state.phase]
+        if phase == kingsburg.PHASE_KINGS_FAVOR:
             self.kingsFavor()
+        elif phase in kingsburg.PRODUCTIVE_SEASONS:
+            self.productiveSeason(phase)
 
         messages = self.state.messages
         self.state = self.state.clearMessages()
@@ -63,3 +68,6 @@ class Game():
         else:
             self.state = result
         self.state = self.state.phaseComplete(kingsburg.PHASE_KINGS_FAVOR)
+
+    def productiveSeason(self, phase: kingsburg.Phase):
+        pass

@@ -29,4 +29,4 @@ class RandomPlayer(Player):
     A player which makes completely random choices.
     """
     def pickFreeResource(self, state):
-        return random.choice(state.pickFreeResourceChoices())
+        return random.choice(state.pickFreeResourceChoices(self.name))
