@@ -1,6 +1,7 @@
-from typing import Dict, Optional
+from typing import Dict, Optional, List, Set, Tuple
+import itertools
 
-def lowest(members: Dict[str, int]):
+def lowest(members: Dict[str, int]) -> Optional[str]:
     """
     Given a dict, returns the key with the lowest value.
     If there is a tie for lowest value, returns None.
@@ -28,7 +29,7 @@ def lowest(members: Dict[str, int]):
 
     return lowest_member
 
-def highest(members: Dict[str, int]):
+def highest(members: Dict[str, int]) -> Optional[str]:
     """
     Given a dict, returns the key with the highest value.
     If there is a tie for highest value, returns None.
@@ -55,3 +56,14 @@ def highest(members: Dict[str, int]):
             highest_member = member
 
     return highest_member
+
+def unique_combinations(nums: List[int]) -> List[List[int]]:
+    combos: List[List[int]] = []
+    alreadySeen: Set[Tuple[int, ...]] = set()
+    for i in range(1, len(nums) + 1):
+        for combo in [x for x in itertools.combinations(nums, i)]:
+            if combo in alreadySeen:
+                continue
+            alreadySeen.add(combo)
+            combos.append(list(combo))
+    return combos
