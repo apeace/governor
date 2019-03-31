@@ -1,5 +1,4 @@
 import random
-from typing import Sequence
 
 import kingsburg
 
@@ -25,16 +24,9 @@ class CliPlayer(Player):
             return self.pickFreeResource(state)
         return resource
 
-class AutomatedChoicePlayer(Player):
+class RandomPlayer(Player):
     """
-    A player type that auto-generates all possible choices
-    and picks one of them.
+    A player which makes completely random choices.
     """
-
-    def pickFreeResource_choices(self, state: kingsburg.State) -> Sequence[str]:
-        return kingsburg.RESOURCES
-
-class RandomPlayer(AutomatedChoicePlayer):
-
     def pickFreeResource(self, state):
-        return random.choice(self.pickFreeResource_choices(state))
+        return random.choice(state.pickFreeResourceChoices())

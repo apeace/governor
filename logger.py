@@ -1,4 +1,4 @@
-from typing import Union, Sequence
+from typing import Union, List
 import collections
 
 import kingsburg
@@ -7,7 +7,7 @@ class Logger():
     """
     Logs game state.
     """
-    def log(self, state: kingsburg.State, message: Union[str, Sequence[str], None]=None):
+    def log(self, state: kingsburg.State, message: Union[str, List[str], None]=None):
         pass
 
     def start(self, state: kingsburg.State):

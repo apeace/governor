@@ -1,4 +1,4 @@
-from typing import Union, Sequence, Dict
+from typing import Union, List, Dict
 
 import kingsburg
 import player
@@ -23,14 +23,14 @@ class Engine():
         """
         self.logger.over(state)
 
-    def tick(self, state: kingsburg.State, message: Union[str, Sequence[str], None]=None):
+    def tick(self, state: kingsburg.State, message: Union[str, List[str], None]=None):
         """
         Let the engine know the game has ticked.
         """
         self.logger.log(state, message=message)
 
     # TODO rename setupPlayers
-    def getPlayers(self) -> Sequence[str]:
+    def getPlayers(self) -> List[str]:
         raise NotImplementedError
 
     def pickFreeResource(self, state: kingsburg.State, name: str) -> str:

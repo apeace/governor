@@ -1,6 +1,6 @@
 from __future__ import annotations
 import copy
-from typing import Sequence, Dict, Union, List
+from typing import Dict, Union, List
 
 import util
 
@@ -15,7 +15,7 @@ RESOURCE_GOLD: Resource = "gold"
 RESOURCE_STONE: Resource = "stone"
 RESOURCE_WOOD: Resource = "wood"
 
-RESOURCES: Sequence[Resource] = [RESOURCE_GOLD, RESOURCE_STONE, RESOURCE_WOOD]
+RESOURCES: List[Resource] = [RESOURCE_GOLD, RESOURCE_STONE, RESOURCE_WOOD]
 
 ##############################################
 # Buildings
@@ -44,7 +44,7 @@ BUILDING_CRANE: Building = "crane"
 BUILDING_TOWN_HALL: Building = "town-hall"
 BUILDING_EMBASSY: Building = "embassy"
 
-PROVINCE_SHEET: Sequence[Sequence[Building]] = [
+PROVINCE_SHEET: List[List[Building]] = [
     [BUILDING_STATUE, BUILDING_CHAPEL, BUILDING_CHURCH, BUILDING_CATHEDRAL],
     [BUILDING_INN, BUILDING_MARKET, BUILDING_FARMS, BUILDING_MERCHANTS_GUILD],
     [BUILDING_GUARD_TOWER, BUILDING_BLACKSMITH, BUILDING_BARRACKS, BUILDING_WIZARDS_GUILD],
@@ -67,7 +67,7 @@ PHASE_FALL: Phase = "fall"
 PHASE_RECRUIT_SOLDIERS: Phase = "recruit-soldiers"
 PHASE_WINTER: Phase = "winter"
 
-PHASES: Sequence[Phase] = [
+PHASES: List[Phase] = [
     PHASE_KINGS_FAVOR, PHASE_SPRING, PHASE_KINGS_REWARD, PHASE_SUMMER,
     PHASE_KINGS_ENVOY, PHASE_FALL, PHASE_RECRUIT_SOLDIERS, PHASE_WINTER
 ]
@@ -75,7 +75,7 @@ PHASES: Sequence[Phase] = [
 MAX_YEAR = 5
 MAX_PHASE = len(PHASES) - 1
 
-PRODUCTIVE_SEASONS: Sequence[Phase] = [
+PRODUCTIVE_SEASONS: List[Phase] = [
     PHASE_SPRING, PHASE_SUMMER, PHASE_FALL
 ]
 
@@ -110,7 +110,7 @@ class State():
         state.messages = []
         return state
 
-    def playerList(self) -> Sequence[PlayerState]:
+    def playerList(self) -> List[PlayerState]:
         return [self.players[name] for name in self.players]
 
     def updatePlayer(self, name: str, player: PlayerState) -> State:
@@ -118,7 +118,7 @@ class State():
         state.players[name] = player
         return state
 
-    def setPlayers(self, playerNames: Sequence[str]) -> State:
+    def setPlayers(self, playerNames: List[str]) -> State:
         state = self.copy()
         for name in playerNames:
             player = PlayerState(name)
@@ -184,6 +184,13 @@ class State():
             return self.message(fewest_resources + " has the fewest resources").giveBonusDie(fewest_resources)
 
         return KINGS_FAVOR_TIE
+
+    def pickFreeResourceChoices(self, name: str) -> List[Resource]:
+        """
+        Returns the list of resources available to the given player
+        when picking a free resource.
+        """
+        return RESOURCES
 
     def takeFreeResource(self, name: str, resource: Resource) -> State:
         """
