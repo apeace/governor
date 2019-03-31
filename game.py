@@ -89,7 +89,7 @@ class Game():
 
     def tick(self):
         """
-        Advance to the next tick of the game.
+        Advance to the next step of the game.
         """
         if self.state.last_phase_played == self.state.phase:
             self.state = self.state.nextPhase()
