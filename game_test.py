@@ -1,11 +1,12 @@
 import game
 
-# TODO get rid of newStates
 # TODO add Pycharm type annotations
 # TODO propagate messages from gamestate
 # convert non-methods to this_case
 # rename bonusDie to has_bonus_die
 # TODO add all buildings
+# TODO engine take free resource
+# TODO randomengine
 
 ##############################################
 # State
@@ -17,31 +18,30 @@ def test_set_players():
 
 def test_next_year():
     state = game.State()
-    newState = state.nextYear()
     assert state.year == 1
-    assert newState.year == 2
+    state = state.nextYear()
+    assert state.year == 2
 
     state.year = game.MAX_YEAR
-    newState = state.nextYear()
-    assert newState.over
+    state = state.nextYear()
+    assert state.over
 
 def test_next_phase():
-    state = game.State()
-    newState = state.nextPhase()
-    assert newState.year == 1
-    assert newState.phase == 1
+    state = game.State().nextPhase()
+    assert state.year == 1
+    assert state.phase == 1
 
     state.phase = game.MAX_PHASE
-    newState = state.nextPhase()
-    assert newState.year == 2
-    assert newState.phase == 0
+    state = state.nextPhase()
+    assert state.year == 2
+    assert state.phase == 0
 
     state.year = game.MAX_YEAR
     state.phase = game.MAX_PHASE
-    newState = state.nextPhase()
-    assert newState.year == game.MAX_YEAR
-    assert newState.phase == game.MAX_PHASE
-    assert newState.over
+    state = state.nextPhase()
+    assert state.year == game.MAX_YEAR
+    assert state.phase == game.MAX_PHASE
+    assert state.over
 
 def test_take_free_resource():
     state = game\
@@ -56,8 +56,10 @@ def test_kings_favor__tie():
     assert result == game.KINGS_FAVOR_TIE
 
 def test_kings_favor__fewest_buildings():
-    state = game.State().setPlayers(["fred", "george"])
-    state = state.giveBuilding("fred", game.BUILDING_STATUE)
+    state = game\
+        .State()\
+        .setPlayers(["fred", "george"])\
+        .giveBuilding("fred", game.BUILDING_STATUE)
     assert not state.players["fred"].bonusDie
     assert not state.players["george"].bonusDie
 
