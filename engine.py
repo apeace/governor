@@ -28,7 +28,7 @@ class Logger():
 
     def start(self, state):
         self.startLog()
-        print("Players: " + str([player.name for player in state.players]))
+        print("Players: " + str([player.name for player in state.playerList()]))
         print("Year: " + str(state.year))
         print("Phase: " + game.PHASES[state.phase] + " (" + str(state.phase) + ")")
         self.endLog()
@@ -64,6 +64,9 @@ class Engine():
         self.logger.log(state, message=message)
 
     def getPlayers(self):
+        raise NotImplementedError
+
+    def pickFreeResource(self, player):
         raise NotImplementedError
 
 class CliEngine(Engine):
