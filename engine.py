@@ -7,6 +7,25 @@ class Logger():
     """
     Logs game state.
     """
+    def log(self, state, message=None):
+        pass
+
+    def start(self, state):
+        pass
+
+    def over(self, state):
+        pass
+
+class SilentLogger(Logger):
+    """
+    Does not log anything.
+    """
+    pass
+
+class StdoutLogger(Logger):
+    """
+    Logs to stdout.
+    """
     def startLog(self):
         print("")
         self.divider()
@@ -21,7 +40,7 @@ class Logger():
         self.startLog()
         if isinstance(message, str):
             print("> " + message)
-        elif isinstance(message, collections.Iterable):
+        elif isinstance(message, collections.Iterable) and len(message) > 0:
             print("\n".join(["> " + m for m in message]))
         print("Year: " + str(state.year))
         print("Phase: " + game.PHASES[state.phase] + " (" + str(state.phase) + ")")
@@ -106,3 +125,30 @@ class CliEngine(PlayerEngine):
                 return names
             names.append(name)
             self.players[name] = player.CliPlayer(name)
+
+class RandomEngine(PlayerEngine):
+    """
+    Play the game with automated random players.
+    """
+    def getPlayers(self):
+        names =["fred", "george", "ron"]
+        for name in names:
+            self.players[name] = player.RandomPlayer(name)
+        return names
+
+class RandomCliEngine(CliEngine, RandomEngine):
+    """
+    Play the game with automated random players.
+    Press Enter on the CLI to advance the game.
+    """
+    def __init__(self, logger):
+        super(RandomEngine, self).__init__(logger)
+
+    def start(self, state):
+        return CliEngine.start(self, state)
+
+    def tick(self, state, message=None):
+        return CliEngine.tick(self, state, message=message)
+
+    def getPlayers(self):
+        return RandomEngine.getPlayers(self)

@@ -1,9 +1,21 @@
 import game
+import engine
 
 # TODO add Pycharm type annotations
-# TODO propagate messages from gamestate
-# TODO engine take free resource
-# TODO randomengine
+
+##############################################
+# Game
+##############################################
+
+def test_random_game():
+    logger = engine.SilentLogger()
+    rand = engine.RandomEngine(logger)
+    state = game.State()
+    g = game.Game(rand, state)
+
+    ## TODO actually test some states
+    for i in range(0, 1000):
+        g.tick()
 
 ##############################################
 # State

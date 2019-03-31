@@ -2,8 +2,8 @@ import game
 import engine
 
 if __name__ == "__main__":
-    logger = engine.Logger()
+    logger = engine.StdoutLogger()
     cli = engine.CliEngine(logger)
     state = game.State()
-    game = game.Game(cli, state)
-    game.play()
+    g = game.Game(cli, state)
+    g.play()

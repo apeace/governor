@@ -36,4 +36,4 @@ class AutomatedChoicePlayer(Player):
 class RandomPlayer(AutomatedChoicePlayer):
 
     def pickFreeResource(self, state):
-        return random.choice(self.pickFreeResource_choices())
+        return random.choice(self.pickFreeResource_choices(state))
