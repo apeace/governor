@@ -101,6 +101,10 @@ class Game():
         if PHASES[self.state.phase] == PHASE_KINGS_FAVOR:
             self.kingsFavor()
 
+        messages = self.state.messages
+        self.state = self.state.clearMessages()
+        self.engine.tick(self.state, messages)
+
         return False
 
     def kingsFavor(self):
@@ -109,17 +113,23 @@ class Game():
         """
         result = self.state.kingsFavor()
         if result == KINGS_FAVOR_TIE:
+            messages = self.state.messages
+            self.state = self.state.clearMessages()
+            messages.append("Kings Favor is a tie")
+            self.engine.tick(self.state, messages)
             for player in self.state.players:
-                resource = self.engine.pickFreeResource(player)
+                resource = self.engine.pickFreeResource(self.state, player)
                 self.state = self.state.takeFreeResource(player, resource)
         else:
             self.state = result
+        self.state = self.state.phaseComplete(PHASE_KINGS_FAVOR)
 
 class State():
     """
     Tracks state of a game and implements state transitions.
     """
     def __init__(self):
+        self.messages = []
         self.players = {}
         self.over = False
         self.year = 1
@@ -128,6 +138,16 @@ class State():
 
     def copy(self):
         return copy.deepcopy(self)
+
+    def message(self, message):
+        state = self.copy()
+        state.messages.append(message)
+        return state
+
+    def clearMessages(self):
+        state = self.copy()
+        state.messages = []
+        return state
 
     def playerList(self):
         return [self.players[name] for name in self.players]
@@ -195,13 +215,12 @@ class State():
                 resource_count[name] += player.resources[resource]
 
         fewest_buildings = util.lowest(building_count)
-        print(fewest_buildings)
         if fewest_buildings is not None:
-            return self.giveBonusDie(fewest_buildings)
+            return self.message(fewest_buildings + " has the fewest buildings").giveBonusDie(fewest_buildings)
 
         fewest_resources = util.lowest(resource_count)
         if fewest_resources is not None:
-            return self.giveBonusDie(fewest_resources)
+            return self.message(fewest_resources + " has the fewest resources").giveBonusDie(fewest_resources)
 
         return KINGS_FAVOR_TIE
 
@@ -215,8 +234,16 @@ class State():
         """
         Gives the given resources to the given player.
         """
+        resource_message = []
+        for resource in resources:
+            amount = resources[resource]
+            if amount >= 0:
+                resource_message.append("+" + str(amount) + " " + resource)
+            else:
+                resource_message.append("-" + str(amount) + " " + resource)
+        message = name + ": " + ",".join(resource_message)
         player = self.players[name]
-        return self.updatePlayer(name, player.addResources(resources))
+        return self.message(message).updatePlayer(name, player.addResources(resources))
 
     def giveBuilding(self, name, building):
         """
@@ -229,8 +256,9 @@ class State():
         """
         Gives a bonus die to the given player.
         """
+        message = name + " gets bonus die"
         player = self.players[name]
-        return self.updatePlayer(name, player.addBonusDie())
+        return self.message(message).updatePlayer(name, player.addBonusDie())
 
 class PlayerState():
     """
