@@ -91,6 +91,9 @@ DiceRoll = List[int]
 # Game state
 ##############################################
 
+# TODO instead of throwing exceptions, log messages and return same state
+# err, set error state so that Game knows to redo step
+
 class State():
     """
     Tracks state of a game, implements state transitions, and
@@ -309,6 +312,8 @@ class PlayerState():
         state.has_bonus_die = True
         return state
 
+    # TODO should be getNumPlayerDice
+    # Bonus Die should be a separate roll
     def getNumDice(self, phase: Phase) -> int:
         """
         Returns the number of dice this player can roll

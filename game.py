@@ -77,6 +77,9 @@ class Game():
         Productive season.
         """
 
+        # TODO Merchant's guild rewards gold
+        # TODO 2-player rule: block advisors
+
         # Each player rolls dice.
         rolls: Dict[str, kingsburg.DiceRoll] = {}
         for name in self.state.players:
@@ -86,6 +89,16 @@ class Game():
         self.state = self.state.clearMessages()
         self.engine.tick(self.state, messages)
 
-        # TODO stuff
+        # TODO Statue & Chapel allow re-rolls
+
+        # TODO influence advisors
+        # TODO king's envoy allows to influence and already-influenced space
+
+        # TODO construct buildings
+        # TODO king's envoy allows to build an additional building
+
+        # TODO at end of summer, Inn rewards token thingie
+        # TODO Town hall allows trading token for VP
+        # TODO Embassy grants VP
 
         self.state = self.state.phaseComplete(phase)

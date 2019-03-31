@@ -24,6 +24,8 @@ class Engine():
         """
         self.logger.over(state)
 
+    # TODO change to engine.log()
+    # Instead of logging states here, we'll log those in the random player
     def tick(self, state: kingsburg.State, message: Union[str, List[str], None]=None):
         """
         Let the engine know the game has ticked.
