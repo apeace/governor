@@ -1,6 +1,6 @@
 from __future__ import annotations
 import copy
-from typing import Dict, Union, List
+from typing import Dict, Union, List, Optional
 
 import util
 
@@ -16,6 +16,27 @@ RESOURCE_STONE: Resource = "stone"
 RESOURCE_WOOD: Resource = "wood"
 
 RESOURCES: List[Resource] = [RESOURCE_GOLD, RESOURCE_STONE, RESOURCE_WOOD]
+
+class Reward():
+    """
+    Represents a reward or a penalty that can be given to a player.
+    """
+
+    def __init__(
+            self,
+            victory_points: int=0,
+            resources: Optional[ResourceInventory]=None,
+            soldiers: int=0,
+            plustwos: int=0,
+            receive_any_resource: int=0,
+            view_enemy: bool=False
+    ):
+        self.victory_points: int = victory_points
+        self.resources: ResourceInventory = {} if resources is None else resources
+        self.soldiers: int = soldiers
+        self.plustwos: int = plustwos
+        self.receive_any_resource: int = receive_any_resource
+        self.view_enemy: bool = view_enemy
 
 ##############################################
 # Buildings
@@ -121,6 +142,33 @@ class Advisor():
     Represents an advisor which has a name and a set
     of rewards it can give.
     """
+    def __init__(self, name: str, rewards: List[Reward]):
+        self.name: str = name
+        self.rewards: List[Reward] = rewards
+
+ADVISOR = {
+    ADVISOR_JESTER: Advisor("jester", [Reward(victory_points=1)]),
+    ADVISOR_SQUIRE: Advisor("squire", [Reward(resources={RESOURCE_GOLD: 1})]),
+    ADVISOR_MERCHANT: Advisor("squire", [Reward(resources={RESOURCE_WOOD: 1}), Reward(resources={RESOURCE_GOLD: 1})]),
+    ADVISOR_SERGEANT: Advisor("sergeant", [Reward(soldiers=1)]),
+    ADVISOR_ALCHEMIST: Advisor("alchemist", [
+        Reward(resources={RESOURCE_WOOD: -1, RESOURCE_GOLD: 1, RESOURCE_STONE: 1}),
+        Reward(resources={RESOURCE_WOOD: 1, RESOURCE_GOLD: -1, RESOURCE_STONE: 1}),
+        Reward(resources={RESOURCE_WOOD: 1, RESOURCE_GOLD: 1, RESOURCE_STONE: -1}),
+    ]),
+    ADVISOR_ASTRONOMER: Advisor("astronomer", [Reward(receive_any_resource=1, plustwos=1)]),
+    ADVISOR_TREASURER: Advisor("treasurer", [Reward(resources={RESOURCE_GOLD: 2})]),
+    ADVISOR_MASTER_HUNTER: Advisor("master-hunter", [Reward(resources={RESOURCE_WOOD: 1, RESOURCE_GOLD: 1}), Reward(resources={RESOURCE_WOOD: 1, RESOURCE_STONE: 1})]),
+    ADVISOR_GENERAL: Advisor("general", [Reward(soldiers=2, view_enemy=True)]),
+    ADVISOR_SWORDSMITH: Advisor("swordsmith", [Reward(resources={RESOURCE_STONE: 1, RESOURCE_WOOD: 1}), Reward(resources={RESOURCE_STONE: 1, RESOURCE_GOLD: 1})]),
+    ADVISOR_DUCHESS: Advisor("duchess", [Reward(receive_any_resource=2, plustwos=1)]),
+    ADVISOR_CHAMPION: Advisor("champion", [Reward(resources={RESOURCE_STONE: 3})]),
+    ADVISOR_SMUGGLER: Advisor("smuggler", [Reward(victory_points=-1, receive_any_resource=3)]),
+    ADVISOR_INVENTOR: Advisor("inventory", [Reward(resources={RESOURCE_GOLD: 1, RESOURCE_WOOD: 1, RESOURCE_STONE: 1})]),
+    ADVISOR_WIZARD: Advisor("wizard", [Reward(resources={RESOURCE_GOLD: 4})]),
+    ADVISOR_QUEEN: Advisor("queen", [Reward(receive_any_resource=2, view_enemy=True, victory_points=3)]),
+    ADVISOR_KING: Advisor("king", [Reward(resources={RESOURCE_GOLD: 1, RESOURCE_WOOD: 1, RESOURCE_STONE: 1}, soldiers=1)]),
+}
 
 ##############################################
 # Die
@@ -165,11 +213,12 @@ class AdvisorInfluence():
     to a given roll.
     """
 
-    def __init__(self, player_dice: DiceRoll, bonus_dice: DiceRoll, plus_two: bool=False, market_modifier: int=0):
+    def __init__(self, player_dice: DiceRoll, bonus_dice: DiceRoll, plus_two: bool=False, market_modifier: int=0, reward: Optional[Reward]=None):
         self.player_dice: DiceRoll = player_dice
         self.bonus_dice: DiceRoll = bonus_dice
         self.plus_two: bool = plus_two
         self.market_modifier: int = market_modifier
+        self.reward: Optional[Reward] = reward
 
     def __eq__(self, other):
         return self.__dict__ == other.__dict__
@@ -436,6 +485,8 @@ class PlayerState():
             RESOURCE_STONE: 0
         }
         self.dice: ProductiveSeasonRoll = ProductiveSeasonRoll([], [])
+        self.victory_points = 0
+        self.soldiers = 0
 
     def copy(self) -> PlayerState:
         return copy.deepcopy(self)
