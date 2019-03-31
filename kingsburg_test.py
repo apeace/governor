@@ -3,6 +3,53 @@ from typing import List
 import kingsburg
 
 ##############################################
+# Advisors
+##############################################
+
+def test_choices_rewards():
+    advisor = kingsburg.ADVISOR[kingsburg.ADVISOR_JESTER]
+    expected = [
+        kingsburg.Reward(victory_points=1)
+    ]
+    got = advisor.choices__rewards({})
+    assert got == expected
+
+    advisor = kingsburg.ADVISOR[kingsburg.ADVISOR_MERCHANT]
+    expected = [
+        kingsburg.Reward(resources={kingsburg.RESOURCE_WOOD: 1}),
+        kingsburg.Reward(resources={kingsburg.RESOURCE_GOLD: 1}),
+    ]
+    got = advisor.choices__rewards({})
+    assert got == expected
+
+    # Can't get rewards from alchemist if you have no resources.
+    advisor = kingsburg.ADVISOR[kingsburg.ADVISOR_ALCHEMIST]
+    expected = []
+    got = advisor.choices__rewards({})
+    assert got == expected
+
+    # If you have two resources you should have two possible rewards.
+    advisor = kingsburg.ADVISOR[kingsburg.ADVISOR_ALCHEMIST]
+    expected = [
+        kingsburg.Reward(resources={kingsburg.RESOURCE_WOOD: -1, kingsburg.RESOURCE_GOLD: 1, kingsburg.RESOURCE_STONE: 1}),
+        kingsburg.Reward(resources={kingsburg.RESOURCE_GOLD: -1, kingsburg.RESOURCE_WOOD: 1, kingsburg.RESOURCE_STONE: 1}),
+    ]
+    got = advisor.choices__rewards({kingsburg.RESOURCE_GOLD: 1, kingsburg.RESOURCE_WOOD: 1})
+    assert got == expected
+
+    advisor = kingsburg.ADVISOR[kingsburg.ADVISOR_DUCHESS]
+    expected = [
+        kingsburg.Reward(resources={kingsburg.RESOURCE_GOLD: 2}, plustwos=1),
+        kingsburg.Reward(resources={kingsburg.RESOURCE_STONE: 2}, plustwos=1),
+        kingsburg.Reward(resources={kingsburg.RESOURCE_WOOD: 2}, plustwos=1),
+        kingsburg.Reward(resources={kingsburg.RESOURCE_GOLD: 1, kingsburg.RESOURCE_WOOD: 1}, plustwos=1),
+        kingsburg.Reward(resources={kingsburg.RESOURCE_GOLD: 1, kingsburg.RESOURCE_STONE: 1}, plustwos=1),
+        kingsburg.Reward(resources={kingsburg.RESOURCE_STONE: 1, kingsburg.RESOURCE_WOOD: 1}, plustwos=1),
+    ]
+    got = advisor.choices__rewards({})
+    assert got == expected
+
+##############################################
 # Die
 ##############################################
 

@@ -38,6 +38,41 @@ class Reward():
         self.receive_any_resource: int = receive_any_resource
         self.view_enemy: bool = view_enemy
 
+    def __eq__(self, other):
+        return self.__dict__ == other.__dict__
+
+# A lookup of the possible resource inventories you can get based on
+# a reward of "receive_any_resource" of the given amount.
+# I was too lazy to write code to generate these.
+# And it's... more efficient...
+RECEIVE_ANY_RESOURCE: Dict[int, List[ResourceInventory]] = {
+    1: [
+        {RESOURCE_GOLD: 1},
+        {RESOURCE_STONE: 1},
+        {RESOURCE_WOOD: 1},
+    ],
+    2: [
+        {RESOURCE_GOLD: 2},
+        {RESOURCE_STONE: 2},
+        {RESOURCE_WOOD: 2},
+        {RESOURCE_GOLD: 1, RESOURCE_WOOD: 1},
+        {RESOURCE_GOLD: 1, RESOURCE_STONE: 1},
+        {RESOURCE_STONE: 1, RESOURCE_WOOD: 1},
+    ],
+    3: [
+        {RESOURCE_GOLD: 3},
+        {RESOURCE_STONE: 3},
+        {RESOURCE_WOOD: 3},
+        {RESOURCE_GOLD: 2, RESOURCE_WOOD: 1},
+        {RESOURCE_GOLD: 2, RESOURCE_STONE: 1},
+        {RESOURCE_WOOD: 2, RESOURCE_GOLD: 1},
+        {RESOURCE_WOOD: 2, RESOURCE_STONE: 1},
+        {RESOURCE_STONE: 2, RESOURCE_WOOD: 1},
+        {RESOURCE_STONE: 2, RESOURCE_GOLD: 1},
+        {RESOURCE_WOOD: 1, RESOURCE_GOLD: 1, RESOURCE_STONE: 1},
+    ]
+}
+
 ##############################################
 # Buildings
 ##############################################
@@ -145,6 +180,29 @@ class Advisor():
     def __init__(self, name: str, rewards: List[Reward]):
         self.name: str = name
         self.rewards: List[Reward] = rewards
+
+    def choices__rewards(self, player_resources: ResourceInventory) -> List[Reward]:
+        possible_rewards = []
+        for reward in self.rewards:
+            skip_reward = False
+            # Can't trade a resource if you don't have it
+            for resource in RESOURCES:
+                player_amount = player_resources[resource] if resource in player_resources else 0
+                if resource in reward.resources and (reward.resources[resource] + player_amount < 0):
+                    skip_reward = True
+                    continue
+            # If you can receive any resource, then instead of adding this
+            # reward directly to the list we'll generate all possible resource rewards.
+            if reward.receive_any_resource > 0:
+                for resource_reward in RECEIVE_ANY_RESOURCE[reward.receive_any_resource]:
+                    rew = copy.deepcopy(reward)
+                    rew.receive_any_resource = 0
+                    rew.resources = resource_reward
+                    possible_rewards.append(rew)
+                continue
+            if not skip_reward:
+                possible_rewards.append(reward)
+        return possible_rewards
 
 ADVISOR = {
     ADVISOR_JESTER: Advisor("jester", [Reward(victory_points=1)]),
@@ -576,6 +634,7 @@ class PlayerState():
             market_combos
         )
 
+        # Determine valid influences.
         possible_influences: List[AdvisorInfluence] = []
         for move in all_possible_moves:
             player_dice: DiceRoll = move[0][0][0]
