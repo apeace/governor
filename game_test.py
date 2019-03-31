@@ -1,8 +1,6 @@
 import game
 import engine
 
-# TODO add Pycharm type annotations
-
 ##############################################
 # Game
 ##############################################

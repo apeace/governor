@@ -1,4 +1,6 @@
-def lowest(members):
+from typing import Dict, Optional
+
+def lowest(members: Dict[str, int]):
     """
     Given a dict, returns the key with the lowest value.
     If there is a tie for lowest value, returns None.
@@ -6,8 +8,8 @@ def lowest(members):
     if len(members) == 0:
         return None
 
-    reverse_members = {}
-    min = None
+    reverse_members: Dict[int, str] = {}
+    min: Optional[int] = None
 
     for member in members:
         reverse_members[members[member]] = member
@@ -17,7 +19,7 @@ def lowest(members):
         if members[member] < min:
             min = members[member]
 
-    lowest_member = None
+    lowest_member: Optional[str] = None
     for member in members:
         if members[member] == min:
             if lowest_member is not None:
@@ -26,7 +28,7 @@ def lowest(members):
 
     return lowest_member
 
-def highest(members):
+def highest(members: Dict[str, int]):
     """
     Given a dict, returns the key with the highest value.
     If there is a tie for highest value, returns None.
@@ -34,8 +36,8 @@ def highest(members):
     if len(members) == 0:
         return None
 
-    reverse_members = {}
-    max = None
+    reverse_members: Dict[int, str] = {}
+    max: Optional[int] = None
 
     for member in members:
         reverse_members[members[member]] = member
@@ -45,7 +47,7 @@ def highest(members):
         if members[member] > max:
             max = members[member]
 
-    highest_member = None
+    highest_member: Optional[str] = None
     for member in members:
         if members[member] == max:
             if highest_member is not None:
