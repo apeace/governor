@@ -1,6 +1,7 @@
 import collections
 
 import game
+import player
 
 class Logger():
     """
@@ -63,13 +64,26 @@ class Engine():
         """
         self.logger.log(state, message=message)
 
+    # TODO rename setupPlayers
     def getPlayers(self):
         raise NotImplementedError
 
-    def pickFreeResource(self, player):
+    def pickFreeResource(self, state, name):
         raise NotImplementedError
 
-class CliEngine(Engine):
+class PlayerEngine(Engine):
+    """
+    Calls on Player objects to make decisions.
+    """
+    def __init__(self, logger):
+        super().__init__(logger)
+        self.players = {}
+
+    def pickFreeResource(self, state, name):
+        p = self.players[name]
+        return p.pickFreeResource(state)
+
+class CliEngine(PlayerEngine):
     """
     Play the game via CLI.
     """
@@ -85,9 +99,10 @@ class CliEngine(Engine):
         self.wait()
 
     def getPlayers(self):
-        players = []
+        names = []
         while True:
-            player = input("Enter player: ")
-            if player == "":
-                return players
-            players.append(player)
+            name = input("Enter player: ")
+            if name == "":
+                return names
+            names.append(name)
+            self.players[name] = player.CliPlayer(name)
