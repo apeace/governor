@@ -52,12 +52,17 @@ def test_kings_favor__fewest_buildings():
         .State() \
         .setPlayers(["fred", "george"]) \
         .giveBuilding("fred", kingsburg.BUILDING_STATUE)
-    assert not state.players["fred"].has_bonus_die
-    assert not state.players["george"].has_bonus_die
+    assert not state.players["fred"].has_kings_favor_bonus_die
+    assert not state.players["george"].has_kings_favor_bonus_die
 
     state = state.kingsFavor()
-    assert state.players["george"].has_bonus_die
-    assert not state.players["fred"].has_bonus_die
+    assert state.players["george"].has_kings_favor_bonus_die
+    assert not state.players["fred"].has_kings_favor_bonus_die
+
+def test_productive_season_rolls__no_ties():
+    state = kingsburg.State().setPlayers(["fred", "george", "ron"])
+    assert state.turn_order == []
+    # TODO
 
 ##############################################
 # PlayerState
@@ -83,22 +88,30 @@ def test_add_building():
     assert player.buildings[1] == kingsburg.BUILDING_CHAPEL
 
 def test_add_bonus_die():
-    player = kingsburg.PlayerState("fred").addBonusDie()
-    assert player.has_bonus_die
+    player = kingsburg.PlayerState("fred").addKingsFavorBonusDie()
+    assert player.has_kings_favor_bonus_die
 
-def test_get_num_dice():
+def test_get_num_player_dice():
     player = kingsburg.PlayerState("fred")
-    assert player.getNumDice(kingsburg.PHASE_SPRING) == 3
+    assert player.getNumPlayerDice(kingsburg.PHASE_SPRING) == 3
 
-    player = kingsburg.PlayerState("fred").addBonusDie()
-    assert player.getNumDice(kingsburg.PHASE_SUMMER) == 3
-    assert player.getNumDice(kingsburg.PHASE_SPRING) == 4
+    player = kingsburg.PlayerState("fred").addKingsFavorBonusDie()
+    assert player.getNumPlayerDice(kingsburg.PHASE_SUMMER) == 3
+    assert player.getNumPlayerDice(kingsburg.PHASE_SPRING) == 3
+
+def test_get_num_bonus_dice():
+    player = kingsburg.PlayerState("fred")
+    assert player.getNumBonusDice(kingsburg.PHASE_SPRING) == 0
+
+    player = kingsburg.PlayerState("fred").addKingsFavorBonusDie()
+    assert player.getNumBonusDice(kingsburg.PHASE_SPRING) == 1
+
+    player = kingsburg.PlayerState("fred").addKingsFavorBonusDie().addBuilding(kingsburg.BUILDING_FARMS)
+    assert player.getNumBonusDice(kingsburg.PHASE_SPRING) == 2
 
 def test_roll():
-    player = kingsburg.PlayerState("fred").roll([1, 2, 3])
-    assert len(player.dice) == 3
-    assert not player.has_bonus_die
-
-    player = kingsburg.PlayerState("fred").addBonusDie().roll([1, 2, 3, 4])
-    assert len(player.dice) == 4
-    assert not player.has_bonus_die
+    roll = kingsburg.ProductiveSeasonRoll([1, 2, 3], [4])
+    player = kingsburg.PlayerState("fred").addKingsFavorBonusDie().roll(roll)
+    assert player.dice.player_dice == [1, 2, 3]
+    assert player.dice.bonus_dice == [4]
+    assert not player.has_kings_favor_bonus_die

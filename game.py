@@ -40,7 +40,7 @@ class Game():
                 return True
             messages = self.state.messages
             self.state = self.state.clearMessages()
-            self.engine.tick(self.state, messages)
+            self.engine.log(self.state, messages)
             return False
 
         phase = kingsburg.PHASES[self.state.phase]
@@ -51,7 +51,7 @@ class Game():
 
         messages = self.state.messages
         self.state = self.state.clearMessages()
-        self.engine.tick(self.state, messages)
+        self.engine.log(self.state, messages)
 
         return False
 
@@ -64,7 +64,7 @@ class Game():
             messages = self.state.messages
             self.state = self.state.clearMessages()
             messages.append("Kings Favor is a tie")
-            self.engine.tick(self.state, messages)
+            self.engine.log(self.state, messages)
             for player in self.state.players:
                 resource = self.engine.pickFreeResource(self.state, player)
                 self.state = self.state.takeFreeResource(player, resource)
@@ -81,13 +81,13 @@ class Game():
         # TODO 2-player rule: block advisors
 
         # Each player rolls dice.
-        rolls: Dict[str, kingsburg.DiceRoll] = {}
+        rolls: Dict[str, kingsburg.ProductiveSeasonRoll] = {}
         for name in self.state.players:
             rolls[name] = self.engine.rollDice(self.state, name)
         self.state = self.state.productiveSeasonRolls(rolls)
         messages = self.state.messages
         self.state = self.state.clearMessages()
-        self.engine.tick(self.state, messages)
+        self.engine.log(self.state, messages)
 
         # TODO Statue & Chapel allow re-rolls
 

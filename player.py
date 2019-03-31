@@ -14,7 +14,7 @@ class Player():
     def pickFreeResource(self, state: kingsburg.State) -> str:
         raise NotImplementedError
 
-    def rollDice(self, state: kingsburg.State) -> kingsburg.DiceRoll:
+    def rollDice(self, state: kingsburg.State) -> kingsburg.ProductiveSeasonRoll:
         raise NotImplementedError
 
 class CliPlayer(Player):
@@ -29,13 +29,21 @@ class CliPlayer(Player):
             return self.pickFreeResource(state)
         return resource
 
-    def rollDice(self, state: kingsburg.State) -> kingsburg.DiceRoll:
-        num = state.getNumDice(self.name)
-        rolls = input(self.name + " rolls " + str(num) + " dice: ")
-        dice = rolls.split()
-        if len(dice) != num:
+    def rollDice(self, state: kingsburg.State) -> kingsburg.ProductiveSeasonRoll:
+        numpdice = state.getNumPlayerDice(self.name)
+        numbdice = state.getNumBonusDice(self.name)
+        rolls = input(self.name + " rolls " + str(numpdice) + " player dice: ")
+        pdice = rolls.split()
+        bdice: List[str] = []
+        if numbdice > 0:
+            rolls = input(self.name + " rolls " + str(numpdice) + " bonus dice: ")
+            bdice = rolls.split()
+        if len(pdice) != numpdice or len(bdice) != numbdice:
             return self.rollDice(state)
-        return [int(die) for die in dice]
+        return kingsburg.ProductiveSeasonRoll(
+            player_dice=[int(die) for die in pdice],
+            bonus_dice=[int(die) for die in bdice]
+        )
 
 class RandomPlayer(Player):
     """
@@ -45,8 +53,14 @@ class RandomPlayer(Player):
     def pickFreeResource(self, state):
         return random.choice(state.pickFreeResourceChoices(self.name))
 
-    def rollDice(self, state: kingsburg.State) -> kingsburg.DiceRoll:
-        dice: List[int] = []
-        for i in range(0, state.getNumDice(self.name)):
-            dice.append(random.randint(1, 6))
-        return dice
+    def rollDice(self, state: kingsburg.State) -> kingsburg.ProductiveSeasonRoll:
+        pdice: List[int] = []
+        bdice: List[int] = []
+        for i in range(0, state.getNumPlayerDice(self.name)):
+            pdice.append(random.randint(1, 6))
+        for i in range(0, state.getNumBonusDice(self.name)):
+            bdice.append(random.randint(1, 6))
+        return kingsburg.ProductiveSeasonRoll(
+            player_dice=pdice,
+            bonus_dice=bdice
+        )

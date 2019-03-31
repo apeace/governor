@@ -87,6 +87,16 @@ KINGS_FAVOR_TIE = "tie"
 
 DiceRoll = List[int]
 
+class ProductiveSeasonRoll():
+    """
+    For each productive season, players roll three dice.
+    They may also have bonus dice to roll.
+    """
+
+    def __init__(self, player_dice: DiceRoll, bonus_dice: DiceRoll):
+        self.player_dice: DiceRoll = player_dice
+        self.bonus_dice: DiceRoll = bonus_dice
+
 ##############################################
 # Game state
 ##############################################
@@ -107,6 +117,7 @@ class State():
         self.year: int = 1
         self.phase: int = 0
         self.last_phase_played: int = -1
+        self.turn_order: List[str] = []
 
     def copy(self) -> State:
         return copy.deepcopy(self)
@@ -187,11 +198,11 @@ class State():
 
         fewest_buildings = util.lowest(building_count)
         if fewest_buildings is not None:
-            return self.message(fewest_buildings + " has the fewest buildings").giveBonusDie(fewest_buildings)
+            return self.message(fewest_buildings + " has the fewest buildings").giveKingsFavorBonusDie(fewest_buildings)
 
         fewest_resources = util.lowest(resource_count)
         if fewest_resources is not None:
-            return self.message(fewest_resources + " has the fewest resources").giveBonusDie(fewest_resources)
+            return self.message(fewest_resources + " has the fewest resources").giveKingsFavorBonusDie(fewest_resources)
 
         return KINGS_FAVOR_TIE
 
@@ -230,22 +241,29 @@ class State():
         player = self.players[name]
         return self.updatePlayer(name, player.addBuilding(building))
 
-    def giveBonusDie(self, name: str):
+    def giveKingsFavorBonusDie(self, name: str):
         """
         Gives a bonus die to the given player.
         """
-        message = name + " gets bonus die"
+        message = name + " gets King's Favor bonus die"
         player = self.players[name]
-        return self.message(message).updatePlayer(name, player.addBonusDie())
+        return self.message(message).updatePlayer(name, player.addKingsFavorBonusDie())
 
-    def getNumDice(self, name: str):
+    def getNumPlayerDice(self, name: str) -> int:
         """
-        Returns the number of dice the given player can roll
+        Returns the number of player dice the given player can roll
         for the current productive season.
         """
-        return self.players[name].getNumDice(PHASES[self.phase])
+        return self.players[name].getNumPlayerDice(PHASES[self.phase])
 
-    def productiveSeasonRolls(self, rolls: Dict[str, DiceRoll]) -> State:
+    def getNumBonusDice(self, name: str) -> int:
+        """
+        Returns the number of bonus dice the given player can roll
+        for the current productive season.
+        """
+        return self.players[name].getNumBonusDice(PHASES[self.phase])
+
+    def productiveSeasonRolls(self, rolls: Dict[str, ProductiveSeasonRoll]) -> State:
         """
         Sets the productive season rolls for each player.
         Sets the turn order.
@@ -257,8 +275,12 @@ class State():
         for name in state.players:
             player = state.players[name]
             roll = rolls[name]
-            roll.sort()
-            state = state.message(name + " rolled " + str(roll))
+            roll.player_dice.sort()
+            roll.bonus_dice.sort()
+            message = name + " rolled player dice: " + ", ".join([str(die) for die in roll.player_dice])
+            if len(roll.bonus_dice) > 0:
+                message += ", bonus dice: " + ", ".join([str(die) for die in roll.bonus_dice])
+            state = state.message(message)
             state = state.updatePlayer(name, player.roll(roll))
         return state
 
@@ -273,14 +295,14 @@ class PlayerState():
 
     def __init__(self, name: str):
         self.name: str = name
-        self.has_bonus_die: bool = False
+        self.has_kings_favor_bonus_die: bool = False
         self.buildings: List[Building] = []
         self.resources: ResourceInventory = {
             RESOURCE_WOOD: 0,
             RESOURCE_GOLD: 0,
             RESOURCE_STONE: 0
         }
-        self.dice: DiceRoll = []
+        self.dice: ProductiveSeasonRoll = ProductiveSeasonRoll([], [])
 
     def copy(self) -> PlayerState:
         return copy.deepcopy(self)
@@ -304,32 +326,42 @@ class PlayerState():
         state.buildings.append(building)
         return state
 
-    def addBonusDie(self) -> PlayerState:
+    def addKingsFavorBonusDie(self) -> PlayerState:
         """
         Adds a bonus die to this player.
         """
         state = self.copy()
-        state.has_bonus_die = True
+        state.has_kings_favor_bonus_die = True
         return state
 
-    # TODO should be getNumPlayerDice
-    # Bonus Die should be a separate roll
-    def getNumDice(self, phase: Phase) -> int:
+    def getNumPlayerDice(self, phase: Phase) -> int:
         """
-        Returns the number of dice this player can roll
+        Returns the number of player dice this player can roll
         for the given productive season.
+        To my knowledge this is always 3, as any additional
+        dice gained are bonus dice, not player dice. I left
+        this as a method just in case I was wrong.
         """
-        # TODO can also be affected by buildings
-        if self.has_bonus_die and phase == PHASE_SPRING:
-            return 4
         return 3
 
-    def roll(self, roll: DiceRoll) -> PlayerState:
+    def getNumBonusDice(self, phase: Phase) -> int:
+        """
+        Returns the number of bonus dice this player can roll
+        for the given productive season.
+        """
+        num = 0
+        if self.has_kings_favor_bonus_die:
+            num += 1
+        if BUILDING_FARMS in self.buildings:
+            num += 1
+        return num
+
+    def roll(self, roll: ProductiveSeasonRoll) -> PlayerState:
         """
         Set's this player's roll to the given roll.
         Resets bonus die.
         """
         state = self.copy()
         state.dice = copy.deepcopy(roll)
-        state.has_bonus_die = False
+        state.has_kings_favor_bonus_die = False
         return state

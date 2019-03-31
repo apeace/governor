@@ -24,11 +24,9 @@ class Engine():
         """
         self.logger.over(state)
 
-    # TODO change to engine.log()
-    # Instead of logging states here, we'll log those in the random player
-    def tick(self, state: kingsburg.State, message: Union[str, List[str], None]=None):
+    def log(self, state: kingsburg.State, message: Union[str, List[str], None]=None):
         """
-        Let the engine know the game has ticked.
+        Let the engine know when states have changed.
         """
         self.logger.log(state, message=message)
 
@@ -39,7 +37,7 @@ class Engine():
     def pickFreeResource(self, state: kingsburg.State, name: str) -> str:
         raise NotImplementedError
 
-    def rollDice(self, state: kingsburg.State, name: str) -> kingsburg.DiceRoll:
+    def rollDice(self, state: kingsburg.State, name: str) -> kingsburg.ProductiveSeasonRoll:
         raise NotImplementedError
 
 class PlayerEngine(Engine):
@@ -54,7 +52,7 @@ class PlayerEngine(Engine):
     def pickFreeResource(self, state, name):
         return self.players[name].pickFreeResource(state)
 
-    def rollDice(self, state: kingsburg.State, name: str) -> kingsburg.DiceRoll:
+    def rollDice(self, state: kingsburg.State, name: str) -> kingsburg.ProductiveSeasonRoll:
         return self.players[name].rollDice(state)
 
 class CliEngine(PlayerEngine):
@@ -69,8 +67,8 @@ class CliEngine(PlayerEngine):
         super().start(state)
         self.wait()
 
-    def tick(self, state, message=None):
-        super().tick(state, message=message)
+    def log(self, state, message=None):
+        super().log(state, message=message)
         self.wait()
 
     def getPlayers(self):
@@ -105,8 +103,8 @@ class RandomCliEngine(CliEngine, RandomEngine):
     def start(self, state):
         return CliEngine.start(self, state)
 
-    def tick(self, state, message=None):
-        return CliEngine.tick(self, state, message=message)
+    def log(self, state, message=None):
+        return CliEngine.log(self, state, message=message)
 
     def getPlayers(self):
         return RandomEngine.getPlayers(self)
