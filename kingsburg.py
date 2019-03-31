@@ -87,6 +87,35 @@ KINGS_FAVOR_TIE = "tie"
 
 AdvisorScore = int
 
+ADVISOR_JESTER: AdvisorScore = 1
+ADVISOR_SQUIRE: AdvisorScore = 2
+ADVISOR_ARCHITECT: AdvisorScore = 3
+ADVISOR_MERCHANT: AdvisorScore = 4
+ADVISOR_SERGEANT: AdvisorScore = 5
+ADVISOR_ALCHEMIST: AdvisorScore = 6
+ADVISOR_ASTRONOMER: AdvisorScore = 7
+ADVISOR_TREASURER: AdvisorScore = 8
+ADVISOR_MASTER_HUNTER: AdvisorScore = 9
+ADVISOR_GENERAL: AdvisorScore = 10
+ADVISOR_SWORDSMITH: AdvisorScore = 11
+ADVISOR_DUCHESS: AdvisorScore = 12
+ADVISOR_CHAMPION: AdvisorScore = 13
+ADVISOR_SMUGGLER: AdvisorScore = 14
+ADVISOR_INVENTOR: AdvisorScore = 15
+ADVISOR_WIZARD: AdvisorScore = 16
+ADVISOR_QUEEN: AdvisorScore = 17
+ADVISOR_KING: AdvisorScore = 18
+
+ADVISORS: List[AdvisorScore] = [
+    ADVISOR_JESTER, ADVISOR_SQUIRE, ADVISOR_ARCHITECT, ADVISOR_MERCHANT,
+    ADVISOR_SERGEANT, ADVISOR_ALCHEMIST, ADVISOR_ASTRONOMER, ADVISOR_TREASURER,
+    ADVISOR_MASTER_HUNTER, ADVISOR_GENERAL, ADVISOR_SWORDSMITH, ADVISOR_DUCHESS,
+    ADVISOR_CHAMPION, ADVISOR_SMUGGLER, ADVISOR_INVENTOR, ADVISOR_WIZARD,
+    ADVISOR_QUEEN, ADVISOR_KING
+]
+
+ADVISOR_MAX = len(ADVISORS)
+
 class Advisor():
     """
     Represents an advisor which has a name and a set
@@ -142,6 +171,9 @@ class AdvisorInfluence():
         self.plus_two: bool = plus_two
         self.market_modifier: int = market_modifier
 
+    def __eq__(self, other):
+        return self.__dict__ == other.__dict__
+
     def advisorScore(self) -> AdvisorScore:
         total = 0
         for die in self.player_dice:
@@ -174,6 +206,7 @@ class State():
         self.phase: int = 0
         self.last_phase_played: int = -1
         self.turn_order: List[str] = []
+        self.taken_advisors = Dict[AdvisorScore, List[str]]
 
     def copy(self) -> State:
         return copy.deepcopy(self)
@@ -268,13 +301,6 @@ class State():
             return self.message(fewest_resources + " has the fewest resources").giveKingsFavorBonusDie(fewest_resources)
 
         return KINGS_FAVOR_TIE
-
-    def pickFreeResourceChoices(self, name: str) -> List[Resource]:
-        """
-        Returns the list of resources available to the given player
-        when picking a free resource.
-        """
-        return RESOURCES
 
     def takeFreeResource(self, name: str, resource: Resource) -> State:
         """
@@ -372,6 +398,20 @@ class State():
 
         return state
 
+    def choices_freeResource(self, name: str) -> List[Resource]:
+        """
+        Returns the list of resources available to the given player
+        when picking a free resource.
+        """
+        return RESOURCES
+
+    def choices_advisorInfluence(self, name: str) -> List[AdvisorInfluence]:
+        available: List[AdvisorScore] = []
+        for advisor in ADVISORS:
+            if advisor not in self.taken_advisors:
+                available.append(advisor)
+        return self.players[name].choices_advisorInfluence(available)
+
 ##############################################
 # Player state
 ##############################################
@@ -385,7 +425,10 @@ class PlayerState():
         self.name: str = name
         self.has_kings_favor_bonus_die: bool = False
         self.has_kings_envoy = False
+        self.used_kings_envoy = False
         self.plustwo_tokens = 0
+        self.used_plustwo_token = False
+        self.used_market = False
         self.buildings: List[Building] = []
         self.resources: ResourceInventory = {
             RESOURCE_WOOD: 0,
@@ -455,3 +498,53 @@ class PlayerState():
         state.dice = copy.deepcopy(roll)
         state.has_kings_favor_bonus_die = False
         return state
+
+    def choices_advisorInfluence(self, available: List[AdvisorScore]) -> List[AdvisorInfluence]:
+        # Determine available market modifiers.
+        market_modifiers: List[int] = []
+        if not self.used_market and BUILDING_MARKET in self.buildings:
+            market_modifiers = [-1, 1]
+
+        # Determine available plustwo modifiers.
+        plustwos: List[int] = []
+        if not self.used_plustwo_token and self.plustwo_tokens > 0:
+            plustwos = [1]
+
+        # Determine all unique combinations of each component.
+        player_dice_combos = util.unique_combinations(self.dice.player_dice)
+        bonus_dice_combos = util.unique_combinations(self.dice.bonus_dice)
+        plustwo_combos = util.unique_combinations(plustwos)
+        market_combos = util.unique_combinations(market_modifiers, 1)
+
+        # Determine all possible moves.
+        all_possible_moves = util.unique_list_pairs(
+            util.unique_list_pairs(
+                util.unique_list_pairs(player_dice_combos, bonus_dice_combos),
+                plustwo_combos
+            ),
+            market_combos
+        )
+
+        possible_influences: List[AdvisorInfluence] = []
+        for move in all_possible_moves:
+            player_dice: DiceRoll = move[0][0][0]
+            bonus_dice: DiceRoll = move[0][0][1]
+            plustwo: bool = len(move[0][1]) > 0
+            market_modifier: int = move[1][0] if len(move[1]) > 0 else 0
+            influence = AdvisorInfluence(player_dice, bonus_dice, plustwo, market_modifier)
+            score = influence.advisorScore()
+            # Can't score below 1 or above 18.
+            if score < 1 or score > ADVISOR_MAX:
+                continue
+            # Must use at least one player die.
+            if len(influence.player_dice) == 0:
+                continue
+            # If the player has the king's envoy and has not used it
+            # yet, they can influence already-influenced advisors
+            # Otherwise, in order for the move to be valid, it must be
+            # in the list of available advisors.
+            if (not self.has_kings_envoy or self.used_kings_envoy) and score not in available:
+                continue
+            possible_influences.append(influence)
+
+        return possible_influences

@@ -51,7 +51,7 @@ class RandomPlayer(Player):
     """
 
     def pickFreeResource(self, state):
-        return random.choice(state.pickFreeResourceChoices(self.name))
+        return random.choice(state.choices_freeResource(self.name))
 
     def rollDice(self, state: kingsburg.State) -> kingsburg.ProductiveSeasonRoll:
         pdice: List[int] = []

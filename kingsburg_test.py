@@ -1,3 +1,5 @@
+from typing import List
+
 import kingsburg
 
 ##############################################
@@ -171,3 +173,735 @@ def test_roll():
     assert player.dice.player_dice == [1, 2, 3]
     assert player.dice.bonus_dice == [4]
     assert not player.has_kings_favor_bonus_die
+
+def test_choices_advisor_influence__simple():
+    player = kingsburg.PlayerState("fred").roll(kingsburg.ProductiveSeasonRoll(
+        player_dice=[1, 1, 1],
+        bonus_dice=[],
+    ))
+    expected: List[kingsburg.AdvisorInfluence] = [
+        kingsburg.AdvisorInfluence(
+            player_dice=[1],
+            bonus_dice=[],
+        ),
+        kingsburg.AdvisorInfluence(
+            player_dice=[1, 1],
+            bonus_dice=[],
+        ),
+        kingsburg.AdvisorInfluence(
+            player_dice=[1, 1, 1],
+            bonus_dice=[],
+        ),
+    ]
+    assert player.choices_advisorInfluence(kingsburg.ADVISORS) == expected
+
+def test_choices_advisor_influence__simple_with_taken():
+    player = kingsburg.PlayerState("fred").roll(kingsburg.ProductiveSeasonRoll(
+        player_dice=[1, 1, 1],
+        bonus_dice=[],
+    ))
+    expected: List[kingsburg.AdvisorInfluence] = [
+        kingsburg.AdvisorInfluence(
+            player_dice=[1],
+            bonus_dice=[],
+        ),
+    ]
+    assert player.choices_advisorInfluence([kingsburg.ADVISOR_JESTER]) == expected
+
+def test_choices_advisor_influence__simple2():
+    player = kingsburg.PlayerState("fred").roll(kingsburg.ProductiveSeasonRoll(
+        player_dice=[1, 2, 3],
+        bonus_dice=[],
+    ))
+    expected: List[kingsburg.AdvisorInfluence] = [
+        kingsburg.AdvisorInfluence(
+            player_dice=[1],
+            bonus_dice=[],
+        ),
+        kingsburg.AdvisorInfluence(
+            player_dice=[2],
+            bonus_dice=[],
+        ),
+        kingsburg.AdvisorInfluence(
+            player_dice=[3],
+            bonus_dice=[],
+        ),
+        kingsburg.AdvisorInfluence(
+            player_dice=[1, 2],
+            bonus_dice=[],
+        ),
+        kingsburg.AdvisorInfluence(
+            player_dice=[1, 3],
+            bonus_dice=[],
+        ),
+        kingsburg.AdvisorInfluence(
+            player_dice=[2, 3],
+            bonus_dice=[],
+        ),
+        kingsburg.AdvisorInfluence(
+            player_dice=[1, 2, 3],
+            bonus_dice=[],
+        ),
+    ]
+    assert player.choices_advisorInfluence(kingsburg.ADVISORS) == expected
+
+def test_choices_advisor_influence__simple2_with_taken():
+    player = kingsburg.PlayerState("fred").roll(kingsburg.ProductiveSeasonRoll(
+        player_dice=[1, 2, 3],
+        bonus_dice=[],
+    ))
+    expected: List[kingsburg.AdvisorInfluence] = [
+        kingsburg.AdvisorInfluence(
+            player_dice=[1],
+            bonus_dice=[],
+        ),
+        kingsburg.AdvisorInfluence(
+            player_dice=[3],
+            bonus_dice=[],
+        ),
+        kingsburg.AdvisorInfluence(
+            player_dice=[1, 2],
+            bonus_dice=[],
+        ),
+    ]
+    assert player.choices_advisorInfluence([kingsburg.ADVISOR_JESTER, kingsburg.ADVISOR_ARCHITECT]) == expected
+
+def test_choices_advisor_influence__withbonus():
+    player = kingsburg.PlayerState("fred").roll(kingsburg.ProductiveSeasonRoll(
+        player_dice=[1, 1, 1],
+        bonus_dice=[1],
+    ))
+    expected: List[kingsburg.AdvisorInfluence] = [
+        kingsburg.AdvisorInfluence(
+            player_dice=[1],
+            bonus_dice=[],
+        ),
+        kingsburg.AdvisorInfluence(
+            player_dice=[1],
+            bonus_dice=[1],
+        ),
+        kingsburg.AdvisorInfluence(
+            player_dice=[1, 1],
+            bonus_dice=[],
+        ),
+        kingsburg.AdvisorInfluence(
+            player_dice=[1, 1],
+            bonus_dice=[1],
+        ),
+        kingsburg.AdvisorInfluence(
+            player_dice=[1, 1, 1],
+            bonus_dice=[],
+        ),
+        kingsburg.AdvisorInfluence(
+            player_dice=[1, 1, 1],
+            bonus_dice=[1],
+        ),
+    ]
+    assert player.choices_advisorInfluence(kingsburg.ADVISORS) == expected
+    
+def test_choices_advisor_influence__insanebonus():
+    player = kingsburg.PlayerState("fred").roll(kingsburg.ProductiveSeasonRoll(
+        player_dice=[6, 6, 6],
+        bonus_dice=[6],
+    ))
+    expected: List[kingsburg.AdvisorInfluence] = [
+        kingsburg.AdvisorInfluence(
+            player_dice=[6],
+            bonus_dice=[],
+        ),
+        kingsburg.AdvisorInfluence(
+            player_dice=[6],
+            bonus_dice=[6],
+        ),
+        kingsburg.AdvisorInfluence(
+            player_dice=[6, 6],
+            bonus_dice=[],
+        ),
+        kingsburg.AdvisorInfluence(
+            player_dice=[6, 6],
+            bonus_dice=[6],
+        ),
+        kingsburg.AdvisorInfluence(
+            player_dice=[6, 6, 6],
+            bonus_dice=[],
+        ),
+    ]
+    assert player.choices_advisorInfluence(kingsburg.ADVISORS) == expected
+
+def test_choices_advisor_influence__withbonus_withplustwo():
+    player = kingsburg.PlayerState("fred").roll(kingsburg.ProductiveSeasonRoll(
+        player_dice=[1, 1, 1],
+        bonus_dice=[1],
+    ))
+    player.plustwo_tokens = 1
+    expected: List[kingsburg.AdvisorInfluence] = [
+        kingsburg.AdvisorInfluence(
+            player_dice=[1],
+            bonus_dice=[],
+        ),
+        kingsburg.AdvisorInfluence(
+            player_dice=[1],
+            bonus_dice=[],
+            plus_two=True
+        ),
+        kingsburg.AdvisorInfluence(
+            player_dice=[1],
+            bonus_dice=[1],
+        ),
+        kingsburg.AdvisorInfluence(
+            player_dice=[1],
+            bonus_dice=[1],
+            plus_two=True
+        ),
+        kingsburg.AdvisorInfluence(
+            player_dice=[1, 1],
+            bonus_dice=[],
+        ),
+        kingsburg.AdvisorInfluence(
+            player_dice=[1, 1],
+            bonus_dice=[],
+            plus_two=True
+        ),
+        kingsburg.AdvisorInfluence(
+            player_dice=[1, 1],
+            bonus_dice=[1],
+        ),
+        kingsburg.AdvisorInfluence(
+            player_dice=[1, 1],
+            bonus_dice=[1],
+            plus_two=True
+        ),
+        kingsburg.AdvisorInfluence(
+            player_dice=[1, 1, 1],
+            bonus_dice=[],
+        ),
+        kingsburg.AdvisorInfluence(
+            player_dice=[1, 1, 1],
+            bonus_dice=[],
+            plus_two=True
+        ),
+        kingsburg.AdvisorInfluence(
+            player_dice=[1, 1, 1],
+            bonus_dice=[1],
+        ),
+        kingsburg.AdvisorInfluence(
+            player_dice=[1, 1, 1],
+            bonus_dice=[1],
+            plus_two=True
+        ),
+    ]
+    assert player.choices_advisorInfluence(kingsburg.ADVISORS) == expected
+
+def test_choices_advisor_influence__withbonus_withplustwo_withmarket():
+    player = kingsburg.PlayerState("fred").roll(kingsburg.ProductiveSeasonRoll(
+        player_dice=[1, 1, 1],
+        bonus_dice=[1],
+    )).addBuilding(kingsburg.BUILDING_MARKET)
+    player.plustwo_tokens = 1
+    expected: List[kingsburg.AdvisorInfluence] = [
+        kingsburg.AdvisorInfluence(
+            player_dice=[1],
+            bonus_dice=[],
+            market_modifier=0
+        ),
+        kingsburg.AdvisorInfluence(
+            player_dice=[1],
+            bonus_dice=[],
+            market_modifier=1
+        ),
+
+        kingsburg.AdvisorInfluence(
+            player_dice=[1],
+            bonus_dice=[],
+            plus_two=True,
+            market_modifier=0
+        ),
+        kingsburg.AdvisorInfluence(
+            player_dice=[1],
+            bonus_dice=[],
+            plus_two=True,
+            market_modifier=-1
+        ),
+        kingsburg.AdvisorInfluence(
+            player_dice=[1],
+            bonus_dice=[],
+            plus_two=True,
+            market_modifier=1
+        ),
+
+        kingsburg.AdvisorInfluence(
+            player_dice=[1],
+            bonus_dice=[1],
+            market_modifier=0
+        ),
+        kingsburg.AdvisorInfluence(
+            player_dice=[1],
+            bonus_dice=[1],
+            market_modifier=-1
+        ),
+        kingsburg.AdvisorInfluence(
+            player_dice=[1],
+            bonus_dice=[1],
+            market_modifier=1
+        ),
+
+        kingsburg.AdvisorInfluence(
+            player_dice=[1],
+            bonus_dice=[1],
+            plus_two=True,
+            market_modifier=0
+        ),
+        kingsburg.AdvisorInfluence(
+            player_dice=[1],
+            bonus_dice=[1],
+            plus_two=True,
+            market_modifier=-1
+        ),
+        kingsburg.AdvisorInfluence(
+            player_dice=[1],
+            bonus_dice=[1],
+            plus_two=True,
+            market_modifier=1
+        ),
+
+        kingsburg.AdvisorInfluence(
+            player_dice=[1, 1],
+            bonus_dice=[],
+            market_modifier=0
+        ),
+        kingsburg.AdvisorInfluence(
+            player_dice=[1, 1],
+            bonus_dice=[],
+            market_modifier=-1
+        ),
+        kingsburg.AdvisorInfluence(
+            player_dice=[1, 1],
+            bonus_dice=[],
+            market_modifier=1
+        ),
+
+        kingsburg.AdvisorInfluence(
+            player_dice=[1, 1],
+            bonus_dice=[],
+            plus_two=True,
+            market_modifier=0
+        ),
+        kingsburg.AdvisorInfluence(
+            player_dice=[1, 1],
+            bonus_dice=[],
+            plus_two=True,
+            market_modifier=-1
+        ),
+        kingsburg.AdvisorInfluence(
+            player_dice=[1, 1],
+            bonus_dice=[],
+            plus_two=True,
+            market_modifier=1
+        ),
+
+        kingsburg.AdvisorInfluence(
+            player_dice=[1, 1],
+            bonus_dice=[1],
+            market_modifier=0
+        ),
+        kingsburg.AdvisorInfluence(
+            player_dice=[1, 1],
+            bonus_dice=[1],
+            market_modifier=-1
+        ),
+        kingsburg.AdvisorInfluence(
+            player_dice=[1, 1],
+            bonus_dice=[1],
+            market_modifier=1
+        ),
+
+        kingsburg.AdvisorInfluence(
+            player_dice=[1, 1],
+            bonus_dice=[1],
+            plus_two=True,
+            market_modifier=0
+        ),
+        kingsburg.AdvisorInfluence(
+            player_dice=[1, 1],
+            bonus_dice=[1],
+            plus_two=True,
+            market_modifier=-1
+        ),
+        kingsburg.AdvisorInfluence(
+            player_dice=[1, 1],
+            bonus_dice=[1],
+            plus_two=True,
+            market_modifier=1
+        ),
+
+        kingsburg.AdvisorInfluence(
+            player_dice=[1, 1, 1],
+            bonus_dice=[],
+            market_modifier=0
+        ),
+        kingsburg.AdvisorInfluence(
+            player_dice=[1, 1, 1],
+            bonus_dice=[],
+            market_modifier=-1
+        ),
+        kingsburg.AdvisorInfluence(
+            player_dice=[1, 1, 1],
+            bonus_dice=[],
+            market_modifier=1
+        ),
+
+        kingsburg.AdvisorInfluence(
+            player_dice=[1, 1, 1],
+            bonus_dice=[],
+            plus_two=True,
+            market_modifier=0
+        ),
+        kingsburg.AdvisorInfluence(
+            player_dice=[1, 1, 1],
+            bonus_dice=[],
+            plus_two=True,
+            market_modifier=-1
+        ),
+        kingsburg.AdvisorInfluence(
+            player_dice=[1, 1, 1],
+            bonus_dice=[],
+            plus_two=True,
+            market_modifier=1
+        ),
+
+        kingsburg.AdvisorInfluence(
+            player_dice=[1, 1, 1],
+            bonus_dice=[1],
+            market_modifier=0
+        ),
+        kingsburg.AdvisorInfluence(
+            player_dice=[1, 1, 1],
+            bonus_dice=[1],
+            market_modifier=-1
+        ),
+        kingsburg.AdvisorInfluence(
+            player_dice=[1, 1, 1],
+            bonus_dice=[1],
+            market_modifier=1
+        ),
+
+        kingsburg.AdvisorInfluence(
+            player_dice=[1, 1, 1],
+            bonus_dice=[1],
+            plus_two=True,
+            market_modifier=0
+        ),
+        kingsburg.AdvisorInfluence(
+            player_dice=[1, 1, 1],
+            bonus_dice=[1],
+            plus_two=True,
+            market_modifier=-1
+        ),
+        kingsburg.AdvisorInfluence(
+            player_dice=[1, 1, 1],
+            bonus_dice=[1],
+            plus_two=True,
+            market_modifier=1
+        ),
+    ]
+
+    got = player.choices_advisorInfluence(kingsburg.ADVISORS)
+
+    assert got == expected
+
+def test_choices_advisor_influence__withbonus_withplustwo_withmarket_excluded():
+    player = kingsburg.PlayerState("fred").roll(kingsburg.ProductiveSeasonRoll(
+        player_dice=[1, 1, 1],
+        bonus_dice=[1],
+    )).addBuilding(kingsburg.BUILDING_MARKET)
+    player.plustwo_tokens = 1
+    expected: List[kingsburg.AdvisorInfluence] = [
+        kingsburg.AdvisorInfluence(
+            player_dice=[1],
+            bonus_dice=[],
+            market_modifier=0
+        ),
+
+        kingsburg.AdvisorInfluence(
+            player_dice=[1],
+            bonus_dice=[],
+            plus_two=True,
+            market_modifier=0
+        ),
+
+        kingsburg.AdvisorInfluence(
+            player_dice=[1],
+            bonus_dice=[1],
+            market_modifier=-1
+        ),
+        kingsburg.AdvisorInfluence(
+            player_dice=[1],
+            bonus_dice=[1],
+            market_modifier=1
+        ),
+
+        kingsburg.AdvisorInfluence(
+            player_dice=[1],
+            bonus_dice=[1],
+            plus_two=True,
+            market_modifier=-1
+        ),
+
+        kingsburg.AdvisorInfluence(
+            player_dice=[1, 1],
+            bonus_dice=[],
+            market_modifier=-1
+        ),
+        kingsburg.AdvisorInfluence(
+            player_dice=[1, 1],
+            bonus_dice=[],
+            market_modifier=1
+        ),
+
+        kingsburg.AdvisorInfluence(
+            player_dice=[1, 1],
+            bonus_dice=[],
+            plus_two=True,
+            market_modifier=-1
+        ),
+
+        kingsburg.AdvisorInfluence(
+            player_dice=[1, 1],
+            bonus_dice=[1],
+            market_modifier=0
+        ),
+
+        kingsburg.AdvisorInfluence(
+            player_dice=[1, 1, 1],
+            bonus_dice=[],
+            market_modifier=0
+        ),
+
+        kingsburg.AdvisorInfluence(
+            player_dice=[1, 1, 1],
+            bonus_dice=[1],
+            market_modifier=-1
+        ),
+    ]
+
+    got = player.choices_advisorInfluence([kingsburg.ADVISOR_JESTER, kingsburg.ADVISOR_ARCHITECT])
+
+    assert got == expected
+
+def test_choices_advisor_influence__withbonus_withplustwo_withmarket_excluded_withkingsenvoy():
+    player = kingsburg.PlayerState("fred").roll(kingsburg.ProductiveSeasonRoll(
+        player_dice=[1, 1, 1],
+        bonus_dice=[1],
+    )).addBuilding(kingsburg.BUILDING_MARKET)
+    player.plustwo_tokens = 1
+    player.has_kings_envoy = True
+    expected: List[kingsburg.AdvisorInfluence] = [
+        kingsburg.AdvisorInfluence(
+            player_dice=[1],
+            bonus_dice=[],
+            market_modifier=0
+        ),
+        kingsburg.AdvisorInfluence(
+            player_dice=[1],
+            bonus_dice=[],
+            market_modifier=1
+        ),
+
+        kingsburg.AdvisorInfluence(
+            player_dice=[1],
+            bonus_dice=[],
+            plus_two=True,
+            market_modifier=0
+        ),
+        kingsburg.AdvisorInfluence(
+            player_dice=[1],
+            bonus_dice=[],
+            plus_two=True,
+            market_modifier=-1
+        ),
+        kingsburg.AdvisorInfluence(
+            player_dice=[1],
+            bonus_dice=[],
+            plus_two=True,
+            market_modifier=1
+        ),
+
+        kingsburg.AdvisorInfluence(
+            player_dice=[1],
+            bonus_dice=[1],
+            market_modifier=0
+        ),
+        kingsburg.AdvisorInfluence(
+            player_dice=[1],
+            bonus_dice=[1],
+            market_modifier=-1
+        ),
+        kingsburg.AdvisorInfluence(
+            player_dice=[1],
+            bonus_dice=[1],
+            market_modifier=1
+        ),
+
+        kingsburg.AdvisorInfluence(
+            player_dice=[1],
+            bonus_dice=[1],
+            plus_two=True,
+            market_modifier=0
+        ),
+        kingsburg.AdvisorInfluence(
+            player_dice=[1],
+            bonus_dice=[1],
+            plus_two=True,
+            market_modifier=-1
+        ),
+        kingsburg.AdvisorInfluence(
+            player_dice=[1],
+            bonus_dice=[1],
+            plus_two=True,
+            market_modifier=1
+        ),
+
+        kingsburg.AdvisorInfluence(
+            player_dice=[1, 1],
+            bonus_dice=[],
+            market_modifier=0
+        ),
+        kingsburg.AdvisorInfluence(
+            player_dice=[1, 1],
+            bonus_dice=[],
+            market_modifier=-1
+        ),
+        kingsburg.AdvisorInfluence(
+            player_dice=[1, 1],
+            bonus_dice=[],
+            market_modifier=1
+        ),
+
+        kingsburg.AdvisorInfluence(
+            player_dice=[1, 1],
+            bonus_dice=[],
+            plus_two=True,
+            market_modifier=0
+        ),
+        kingsburg.AdvisorInfluence(
+            player_dice=[1, 1],
+            bonus_dice=[],
+            plus_two=True,
+            market_modifier=-1
+        ),
+        kingsburg.AdvisorInfluence(
+            player_dice=[1, 1],
+            bonus_dice=[],
+            plus_two=True,
+            market_modifier=1
+        ),
+
+        kingsburg.AdvisorInfluence(
+            player_dice=[1, 1],
+            bonus_dice=[1],
+            market_modifier=0
+        ),
+        kingsburg.AdvisorInfluence(
+            player_dice=[1, 1],
+            bonus_dice=[1],
+            market_modifier=-1
+        ),
+        kingsburg.AdvisorInfluence(
+            player_dice=[1, 1],
+            bonus_dice=[1],
+            market_modifier=1
+        ),
+
+        kingsburg.AdvisorInfluence(
+            player_dice=[1, 1],
+            bonus_dice=[1],
+            plus_two=True,
+            market_modifier=0
+        ),
+        kingsburg.AdvisorInfluence(
+            player_dice=[1, 1],
+            bonus_dice=[1],
+            plus_two=True,
+            market_modifier=-1
+        ),
+        kingsburg.AdvisorInfluence(
+            player_dice=[1, 1],
+            bonus_dice=[1],
+            plus_two=True,
+            market_modifier=1
+        ),
+
+        kingsburg.AdvisorInfluence(
+            player_dice=[1, 1, 1],
+            bonus_dice=[],
+            market_modifier=0
+        ),
+        kingsburg.AdvisorInfluence(
+            player_dice=[1, 1, 1],
+            bonus_dice=[],
+            market_modifier=-1
+        ),
+        kingsburg.AdvisorInfluence(
+            player_dice=[1, 1, 1],
+            bonus_dice=[],
+            market_modifier=1
+        ),
+
+        kingsburg.AdvisorInfluence(
+            player_dice=[1, 1, 1],
+            bonus_dice=[],
+            plus_two=True,
+            market_modifier=0
+        ),
+        kingsburg.AdvisorInfluence(
+            player_dice=[1, 1, 1],
+            bonus_dice=[],
+            plus_two=True,
+            market_modifier=-1
+        ),
+        kingsburg.AdvisorInfluence(
+            player_dice=[1, 1, 1],
+            bonus_dice=[],
+            plus_two=True,
+            market_modifier=1
+        ),
+
+        kingsburg.AdvisorInfluence(
+            player_dice=[1, 1, 1],
+            bonus_dice=[1],
+            market_modifier=0
+        ),
+        kingsburg.AdvisorInfluence(
+            player_dice=[1, 1, 1],
+            bonus_dice=[1],
+            market_modifier=-1
+        ),
+        kingsburg.AdvisorInfluence(
+            player_dice=[1, 1, 1],
+            bonus_dice=[1],
+            market_modifier=1
+        ),
+
+        kingsburg.AdvisorInfluence(
+            player_dice=[1, 1, 1],
+            bonus_dice=[1],
+            plus_two=True,
+            market_modifier=0
+        ),
+        kingsburg.AdvisorInfluence(
+            player_dice=[1, 1, 1],
+            bonus_dice=[1],
+            plus_two=True,
+            market_modifier=-1
+        ),
+        kingsburg.AdvisorInfluence(
+            player_dice=[1, 1, 1],
+            bonus_dice=[1],
+            plus_two=True,
+            market_modifier=1
+        ),
+    ]
+
+    got = player.choices_advisorInfluence([kingsburg.ADVISOR_JESTER, kingsburg.ADVISOR_ARCHITECT])
+
+    assert got == expected
