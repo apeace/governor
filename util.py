@@ -1,5 +1,6 @@
 from typing import Dict, Optional, List, Set, Tuple
 import itertools
+import collections
 
 def lowest(members: Dict[str, int]) -> Optional[str]:
     """
@@ -57,10 +58,13 @@ def highest(members: Dict[str, int]) -> Optional[str]:
 
     return highest_member
 
-def unique_combinations(nums: List[int]) -> List[List[int]]:
+def unique_combinations(nums: List[int], max_len=None) -> List[List[int]]:
     combos: List[List[int]] = []
     alreadySeen: Set[Tuple[int, ...]] = set()
-    for i in range(0, len(nums) + 1):
+    l = max_len
+    if l is None:
+        l = len(nums)
+    for i in range(0, l+1):
         for combo in [x for x in itertools.combinations(nums, i)]:
             if combo in alreadySeen:
                 continue
@@ -75,9 +79,18 @@ def unique_list_pairs(lists1, lists2):
     for l1 in lists1:
         for l2 in lists2:
             combo = [l1, l2]
-            t = tuple([tuple(x) for x in combo])
+            t = tuplize(combo)
             if t in alreadySeen:
                 continue
             alreadySeen.add(t)
             combos.append(combo)
     return combos
+
+def tuplize(list):
+    out = []
+    for item in list:
+        if not isinstance(item, collections.Iterable):
+            out.append(item)
+        else:
+            out.append(tuplize(item))
+    return tuple(out)
