@@ -1,13 +1,14 @@
 import game
 import engine
+import logger
 
 ##############################################
 # Game
 ##############################################
 
 def test_random_game():
-    logger = engine.SilentLogger()
-    rand = engine.RandomEngine(logger)
+    l = logger.SilentLogger()
+    rand = engine.RandomEngine(l)
     state = game.State()
     g = game.Game(rand, state)
 
