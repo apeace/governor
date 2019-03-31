@@ -1,4 +1,5 @@
 import random
+from typing import Sequence
 
 import game
 
@@ -9,7 +10,7 @@ class Player():
     def __init__(self, name):
         self.name = name
 
-    def pickFreeResource(self, state):
+    def pickFreeResource(self, state: game.State) -> str:
         raise NotImplementedError
 
 class CliPlayer(Player):
@@ -30,7 +31,7 @@ class AutomatedChoicePlayer(Player):
     and picks one of them.
     """
 
-    def pickFreeResource_choices(self, state):
+    def pickFreeResource_choices(self, state: game.State) -> Sequence[str]:
         return game.RESOURCES
 
 class RandomPlayer(AutomatedChoicePlayer):
