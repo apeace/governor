@@ -4,7 +4,6 @@ import game
 # TODO propagate messages from gamestate
 # convert non-methods to this_case
 # rename bonusDie to has_bonus_die
-# TODO add all buildings
 # TODO engine take free resource
 # TODO randomengine
 
