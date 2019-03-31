@@ -8,6 +8,7 @@ class Engine():
     """
     Provides inputs necessary to advance through game states.
     """
+
     def __init__(self, logger: logger.Logger):
         self.logger = logger
 
@@ -40,6 +41,7 @@ class PlayerEngine(Engine):
     """
     Calls on Player objects to make decisions.
     """
+
     def __init__(self, logger):
         super().__init__(logger)
         self.players: Dict[str, player.Player] = {}
@@ -52,6 +54,7 @@ class CliEngine(PlayerEngine):
     """
     Play the game via CLI.
     """
+
     def wait(self):
         input("")
 
@@ -76,6 +79,7 @@ class RandomEngine(PlayerEngine):
     """
     Play the game with automated random players.
     """
+
     def getPlayers(self):
         names =["fred", "george", "ron"]
         for name in names:
@@ -87,6 +91,7 @@ class RandomCliEngine(CliEngine, RandomEngine):
     Play the game with automated random players.
     Press Enter on the CLI to advance the game.
     """
+
     def __init__(self, logger):
         super(RandomEngine, self).__init__(logger)
 

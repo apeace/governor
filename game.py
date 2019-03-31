@@ -5,6 +5,7 @@ class Game():
     """
     Plays through a game, using inputs from an Engine.
     """
+
     def __init__(self, engine: engine.Engine, state: kingsburg.State):
         self.engine = engine
         self.state = state

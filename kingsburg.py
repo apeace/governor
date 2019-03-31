@@ -87,8 +87,10 @@ KINGS_FAVOR_TIE = "tie"
 
 class State():
     """
-    Tracks state of a game and implements state transitions.
+    Tracks state of a game, implements state transitions, and
+    computes possible next moves.
     """
+
     def __init__(self):
         self.messages: List[str] = []
         self.players: Dict[str, PlayerState] = {}
@@ -235,6 +237,7 @@ class PlayerState():
     """
     Tracks the state of an individual player.
     """
+
     def __init__(self, name: str):
         self.name: str = name
         self.has_bonus_die: bool = False

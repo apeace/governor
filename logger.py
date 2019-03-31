@@ -7,6 +7,7 @@ class Logger():
     """
     Logs game state.
     """
+
     def log(self, state: kingsburg.State, message: Union[str, List[str], None]=None):
         pass
 
@@ -20,12 +21,14 @@ class SilentLogger(Logger):
     """
     Does not log anything.
     """
+
     pass
 
 class StdoutLogger(Logger):
     """
     Logs to stdout.
     """
+
     def startLog(self):
         print("")
         self.divider()

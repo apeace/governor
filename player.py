@@ -6,6 +6,7 @@ class Player():
     """
     Makes decisions based on game state.
     """
+
     def __init__(self, name):
         self.name = name
 
@@ -28,5 +29,6 @@ class RandomPlayer(Player):
     """
     A player which makes completely random choices.
     """
+
     def pickFreeResource(self, state):
         return random.choice(state.pickFreeResourceChoices(self.name))
