@@ -1,6 +1,14 @@
 import kingsburg
 
 ##############################################
+# Die
+##############################################
+
+def test_productive_season_roll_total():
+    roll = kingsburg.ProductiveSeasonRoll([1, 2, 3], [4])
+    assert roll.totalValue() == 10
+
+##############################################
 # State
 ##############################################
 
@@ -59,10 +67,49 @@ def test_kings_favor__fewest_buildings():
     assert state.players["george"].has_kings_favor_bonus_die
     assert not state.players["fred"].has_kings_favor_bonus_die
 
-def test_productive_season_rolls__no_ties():
+def test_productive_season_rolls__no_tie():
     state = kingsburg.State().setPlayers(["fred", "george", "ron"])
-    assert state.turn_order == []
-    # TODO
+    assert state.turn_order == ["fred", "george", "ron"]
+
+    state = state.productiveSeasonRolls({
+        "ron": kingsburg.ProductiveSeasonRoll([1, 1, 1], []),
+        "fred": kingsburg.ProductiveSeasonRoll([2, 2, 2], []),
+        "george": kingsburg.ProductiveSeasonRoll([3, 3, 3], [])
+    })
+    assert state.turn_order == ["ron", "fred", "george"]
+
+def test_productive_season_rolls__tie():
+    state = kingsburg.State().setPlayers(["fred", "george", "ron"])
+    state.turn_order = ["ron", "fred", "george"]
+
+    state = state.productiveSeasonRolls({
+        "fred": kingsburg.ProductiveSeasonRoll([2, 2, 2], []),
+        "george": kingsburg.ProductiveSeasonRoll([1, 1, 1], []),
+        "ron": kingsburg.ProductiveSeasonRoll([2, 2, 2], [])
+    })
+    assert state.turn_order == ["george", "ron", "fred"]
+
+def test_productive_season_rolls__tie2():
+    state = kingsburg.State().setPlayers(["fred", "george", "ron"])
+    state.turn_order = ["ron", "fred", "george"]
+
+    state = state.productiveSeasonRolls({
+        "fred": kingsburg.ProductiveSeasonRoll([3, 3, 3], []),
+        "george": kingsburg.ProductiveSeasonRoll([2, 2, 2], []),
+        "ron": kingsburg.ProductiveSeasonRoll([2, 2, 2], [])
+    })
+    assert state.turn_order == ["ron", "george", "fred"]
+
+def test_productive_season_rolls__tie_bonus_die():
+    state = kingsburg.State().setPlayers(["fred", "george", "ron"])
+    state.turn_order = ["ron", "fred", "george"]
+
+    state = state.productiveSeasonRolls({
+        "fred": kingsburg.ProductiveSeasonRoll([2, 2, 1], [2]),
+        "george": kingsburg.ProductiveSeasonRoll([1, 1, 1], []),
+        "ron": kingsburg.ProductiveSeasonRoll([2, 2, 2], [1])
+    })
+    assert state.turn_order == ["george", "ron", "fred"]
 
 ##############################################
 # PlayerState

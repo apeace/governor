@@ -97,6 +97,17 @@ class ProductiveSeasonRoll():
         self.player_dice: DiceRoll = player_dice
         self.bonus_dice: DiceRoll = bonus_dice
 
+    def totalValue(self) -> int:
+        """
+        Returns the total value of all player dice and hit dice together.
+        """
+        total = 0
+        for die in self.player_dice:
+            total += die
+        for die in self.bonus_dice:
+            total += die
+        return total
+
 ##############################################
 # Game state
 ##############################################
@@ -141,10 +152,17 @@ class State():
         return state
 
     def setPlayers(self, playerNames: List[str]) -> State:
+        """
+        Initialize player states and turn order.
+        The rules specify that the initial turn order should be "random".
+        Therefore, it is assumed the playerNames input has already been
+        randomized by whatever method the Engine chose.
+        """
         state = self.copy()
         for name in playerNames:
             player = PlayerState(name)
             state.players[name] = player
+            state.turn_order.append(name)
         return state
 
     def nextYear(self) -> State:
@@ -269,9 +287,9 @@ class State():
         Sets the turn order.
         Resets bonus die.
         """
-        # TODO test
-        # TODO set turn order
         state = self.copy()
+
+        # Update player rolls.
         for name in state.players:
             player = state.players[name]
             roll = rolls[name]
@@ -282,6 +300,31 @@ class State():
                 message += ", bonus dice: " + ", ".join([str(die) for die in roll.bonus_dice])
             state = state.message(message)
             state = state.updatePlayer(name, player.roll(roll))
+
+        # Set turn order. The lowest total roll goes first.
+        # If there is a tie, the tied players maintain the
+        # same order in relation to each other that they
+        # had in the existing turn order.
+        rollers_by_score: Dict[int, List[str]] = {}
+        for name in rolls:
+            score = rolls[name].totalValue()
+            if score not in rollers_by_score:
+                rollers_by_score[score] = []
+            rollers_by_score[score].append(name)
+        scores: List[int] = []
+        for score in rollers_by_score:
+            scores.append(score)
+        scores.sort()
+        new_turn_order: List[str] = []
+        for score in scores:
+            if len(rollers_by_score[score]) == 1:
+                new_turn_order.append(rollers_by_score[score][0])
+            else:
+                for name in state.turn_order:
+                    if name in rollers_by_score[score]:
+                        new_turn_order.append(name)
+        state.turn_order = new_turn_order
+
         return state
 
 ##############################################
