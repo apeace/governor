@@ -1,29 +1,29 @@
 from typing import Union, Sequence, Dict
 
-import game
+import kingsburg
 import player
 import logger
 
 class Engine():
     """
-    Provides a means to advance through game states.
+    Provides inputs necessary to advance through game states.
     """
     def __init__(self, logger: logger.Logger):
         self.logger = logger
 
-    def start(self, state: game.State):
+    def start(self, state: kingsburg.State):
         """
         Let the engine know the game is starting.
         """
         self.logger.start(state)
 
-    def over(self, state: game.State):
+    def over(self, state: kingsburg.State):
         """
         Let the engine know the game is over.
         """
         self.logger.over(state)
 
-    def tick(self, state: game.State, message: Union[str, Sequence[str], None]=None):
+    def tick(self, state: kingsburg.State, message: Union[str, Sequence[str], None]=None):
         """
         Let the engine know the game has ticked.
         """
@@ -33,7 +33,7 @@ class Engine():
     def getPlayers(self) -> Sequence[str]:
         raise NotImplementedError
 
-    def pickFreeResource(self, state: game.State, name: str) -> str:
+    def pickFreeResource(self, state: kingsburg.State, name: str) -> str:
         raise NotImplementedError
 
 class PlayerEngine(Engine):
