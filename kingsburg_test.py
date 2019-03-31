@@ -8,6 +8,15 @@ def test_productive_season_roll_total():
     roll = kingsburg.ProductiveSeasonRoll([1, 2, 3], [4])
     assert roll.totalValue() == 10
 
+def test_advisor_influence_score():
+    influence = kingsburg.AdvisorInfluence(
+        [1, 2, 3],
+        [4],
+        plus_two=True,
+        market_modifier=-1
+    )
+    assert influence.advisorScore() == 11
+
 ##############################################
 # State
 ##############################################

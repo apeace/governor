@@ -82,6 +82,18 @@ PRODUCTIVE_SEASONS: List[Phase] = [
 KINGS_FAVOR_TIE = "tie"
 
 ##############################################
+# Advisors
+##############################################
+
+AdvisorScore = int
+
+class Advisor():
+    """
+    Represents an advisor which has a name and a set
+    of rewards it can give.
+    """
+
+##############################################
 # Die
 ##############################################
 
@@ -89,6 +101,7 @@ DiceRoll = List[int]
 
 class ProductiveSeasonRoll():
     """
+    Represents a productive season dice roll.
     For each productive season, players roll three dice.
     They may also have bonus dice to roll.
     """
@@ -106,6 +119,38 @@ class ProductiveSeasonRoll():
             total += die
         for die in self.bonus_dice:
             total += die
+        return total
+
+class AdvisorInfluence():
+    """
+    Represents a combination of player dice, bonus dice,
+    plustwo tokens, and market influence used to influence
+    a particular advisor.
+
+    Only zero or one plustwo tokens may be used.
+
+    Zero or more bonus dice may be used, but they must be used
+    in combination with at least one player dice.
+
+    The Market building may be used to add one or minus one
+    to a given roll.
+    """
+
+    def __init__(self, player_dice: DiceRoll, bonus_dice: DiceRoll, plus_two: bool=False, market_modifier: int=0):
+        self.player_dice: DiceRoll = player_dice
+        self.bonus_dice: DiceRoll = bonus_dice
+        self.plus_two: bool = plus_two
+        self.market_modifier: int = market_modifier
+
+    def advisorScore(self) -> AdvisorScore:
+        total = 0
+        for die in self.player_dice:
+            total += die
+        for die in self.bonus_dice:
+            total += die
+        if self.plus_two:
+            total += 2
+        total += self.market_modifier
         return total
 
 ##############################################
@@ -339,6 +384,8 @@ class PlayerState():
     def __init__(self, name: str):
         self.name: str = name
         self.has_kings_favor_bonus_die: bool = False
+        self.has_kings_envoy = False
+        self.plustwo_tokens = 0
         self.buildings: List[Building] = []
         self.resources: ResourceInventory = {
             RESOURCE_WOOD: 0,
