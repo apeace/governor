@@ -82,6 +82,12 @@ PRODUCTIVE_SEASONS: List[Phase] = [
 KINGS_FAVOR_TIE = "tie"
 
 ##############################################
+# Die
+##############################################
+
+DiceRoll = List[int]
+
+##############################################
 # Game state
 ##############################################
 
@@ -229,6 +235,30 @@ class State():
         player = self.players[name]
         return self.message(message).updatePlayer(name, player.addBonusDie())
 
+    def getNumDice(self, name: str):
+        """
+        Returns the number of dice the given player can roll
+        for the current productive season.
+        """
+        return self.players[name].getNumDice(PHASES[self.phase])
+
+    def productiveSeasonRolls(self, rolls: Dict[str, DiceRoll]) -> State:
+        """
+        Sets the productive season rolls for each player.
+        Sets the turn order.
+        Resets bonus die.
+        """
+        # TODO test
+        # TODO set turn order
+        state = self.copy()
+        for name in state.players:
+            player = state.players[name]
+            roll = rolls[name]
+            roll.sort()
+            state = state.message(name + " rolled " + str(roll))
+            state = state.updatePlayer(name, player.roll(roll))
+        return state
+
 ##############################################
 # Player state
 ##############################################
@@ -247,6 +277,7 @@ class PlayerState():
             RESOURCE_GOLD: 0,
             RESOURCE_STONE: 0
         }
+        self.dice: DiceRoll = []
 
     def copy(self) -> PlayerState:
         return copy.deepcopy(self)
@@ -276,4 +307,24 @@ class PlayerState():
         """
         state = self.copy()
         state.has_bonus_die = True
+        return state
+
+    def getNumDice(self, phase: Phase) -> int:
+        """
+        Returns the number of dice this player can roll
+        for the given productive season.
+        """
+        # TODO can also be affected by buildings
+        if self.has_bonus_die and phase == PHASE_SPRING:
+            return 4
+        return 3
+
+    def roll(self, roll: DiceRoll) -> PlayerState:
+        """
+        Set's this player's roll to the given roll.
+        Resets bonus die.
+        """
+        state = self.copy()
+        state.dice = copy.deepcopy(roll)
+        state.has_bonus_die = False
         return state

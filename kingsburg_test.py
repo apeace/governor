@@ -85,3 +85,20 @@ def test_add_building():
 def test_add_bonus_die():
     player = kingsburg.PlayerState("fred").addBonusDie()
     assert player.has_bonus_die
+
+def test_get_num_dice():
+    player = kingsburg.PlayerState("fred")
+    assert player.getNumDice(kingsburg.PHASE_SPRING) == 3
+
+    player = kingsburg.PlayerState("fred").addBonusDie()
+    assert player.getNumDice(kingsburg.PHASE_SUMMER) == 3
+    assert player.getNumDice(kingsburg.PHASE_SPRING) == 4
+
+def test_roll():
+    player = kingsburg.PlayerState("fred").roll([1, 2, 3])
+    assert len(player.dice) == 3
+    assert not player.has_bonus_die
+
+    player = kingsburg.PlayerState("fred").addBonusDie().roll([1, 2, 3, 4])
+    assert len(player.dice) == 4
+    assert not player.has_bonus_die

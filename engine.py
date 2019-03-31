@@ -37,6 +37,9 @@ class Engine():
     def pickFreeResource(self, state: kingsburg.State, name: str) -> str:
         raise NotImplementedError
 
+    def rollDice(self, state: kingsburg.State, name: str) -> kingsburg.DiceRoll:
+        raise NotImplementedError
+
 class PlayerEngine(Engine):
     """
     Calls on Player objects to make decisions.
@@ -47,8 +50,10 @@ class PlayerEngine(Engine):
         self.players: Dict[str, player.Player] = {}
 
     def pickFreeResource(self, state, name):
-        p = self.players[name]
-        return p.pickFreeResource(state)
+        return self.players[name].pickFreeResource(state)
+
+    def rollDice(self, state: kingsburg.State, name: str) -> kingsburg.DiceRoll:
+        return self.players[name].rollDice(state)
 
 class CliEngine(PlayerEngine):
     """

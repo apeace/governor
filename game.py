@@ -1,3 +1,5 @@
+from typing import Dict
+
 import engine
 import kingsburg
 
@@ -71,4 +73,19 @@ class Game():
         self.state = self.state.phaseComplete(kingsburg.PHASE_KINGS_FAVOR)
 
     def productiveSeason(self, phase: kingsburg.Phase):
-        pass
+        """
+        Productive season.
+        """
+
+        # Each player rolls dice.
+        rolls: Dict[str, kingsburg.DiceRoll] = {}
+        for name in self.state.players:
+            rolls[name] = self.engine.rollDice(self.state, name)
+        self.state = self.state.productiveSeasonRolls(rolls)
+        messages = self.state.messages
+        self.state = self.state.clearMessages()
+        self.engine.tick(self.state, messages)
+
+        # TODO stuff
+
+        self.state = self.state.phaseComplete(phase)
