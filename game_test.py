@@ -2,8 +2,6 @@ import game
 
 # TODO add Pycharm type annotations
 # TODO propagate messages from gamestate
-# convert non-methods to this_case
-# rename bonusDie to has_bonus_die
 # TODO engine take free resource
 # TODO randomengine
 
@@ -59,12 +57,12 @@ def test_kings_favor__fewest_buildings():
         .State()\
         .setPlayers(["fred", "george"])\
         .giveBuilding("fred", game.BUILDING_STATUE)
-    assert not state.players["fred"].bonusDie
-    assert not state.players["george"].bonusDie
+    assert not state.players["fred"].has_bonus_die
+    assert not state.players["george"].has_bonus_die
 
     state = state.kingsFavor()
-    assert state.players["george"].bonusDie
-    assert not state.players["fred"].bonusDie
+    assert state.players["george"].has_bonus_die
+    assert not state.players["fred"].has_bonus_die
 
 ##############################################
 # PlayerState
@@ -91,4 +89,4 @@ def test_add_building():
 
 def test_add_bonus_die():
     player = game.PlayerState("fred").addBonusDie()
-    assert player.bonusDie
+    assert player.has_bonus_die

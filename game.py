@@ -238,7 +238,7 @@ class PlayerState():
     """
     def __init__(self, name):
         self.name = name
-        self.bonusDie = False
+        self.has_bonus_die = False
         self.buildings = []
         self.resources = {
             RESOURCE_WOOD: 0,
@@ -273,5 +273,5 @@ class PlayerState():
         Adds a bonus die to this player.
         """
         state = self.copy()
-        state.bonusDie = True
+        state.has_bonus_die = True
         return state
