@@ -17,6 +17,9 @@ class Player():
     def rollDice(self, state: kingsburg.State) -> kingsburg.ProductiveSeasonRoll:
         raise NotImplementedError
 
+    def influenceAdvisor(self, state: kingsburg.State) -> kingsburg.AdvisorInfluence:
+        raise NotImplementedError
+
 class CliPlayer(Player):
     """
     A player which asks for choices via CLI.
@@ -45,6 +48,10 @@ class CliPlayer(Player):
             bonus_dice=[int(die) for die in bdice]
         )
 
+    def influenceAdvisor(self, state: kingsburg.State) -> kingsburg.AdvisorInfluence:
+        # TODO
+        return kingsburg.ADVISOR_INFLUENCE_PASS
+
 class RandomPlayer(Player):
     """
     A player which makes completely random choices.
@@ -64,3 +71,6 @@ class RandomPlayer(Player):
             player_dice=pdice,
             bonus_dice=bdice
         )
+
+    def influenceAdvisor(self, state: kingsburg.State) -> kingsburg.AdvisorInfluence:
+        return random.choice(state.choices_advisorInfluenceReward(self.name))

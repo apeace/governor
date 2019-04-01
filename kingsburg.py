@@ -207,7 +207,8 @@ class Advisor():
 ADVISOR = {
     ADVISOR_JESTER: Advisor("jester", [Reward(victory_points=1)]),
     ADVISOR_SQUIRE: Advisor("squire", [Reward(resources={RESOURCE_GOLD: 1})]),
-    ADVISOR_MERCHANT: Advisor("squire", [Reward(resources={RESOURCE_WOOD: 1}), Reward(resources={RESOURCE_GOLD: 1})]),
+    ADVISOR_ARCHITECT: Advisor("architect", [Reward(resources={RESOURCE_WOOD: 1})]),
+    ADVISOR_MERCHANT: Advisor("merchant", [Reward(resources={RESOURCE_WOOD: 1}), Reward(resources={RESOURCE_GOLD: 1})]),
     ADVISOR_SERGEANT: Advisor("sergeant", [Reward(soldiers=1)]),
     ADVISOR_ALCHEMIST: Advisor("alchemist", [
         Reward(resources={RESOURCE_WOOD: -1, RESOURCE_GOLD: 1, RESOURCE_STONE: 1}),
@@ -292,6 +293,8 @@ class AdvisorInfluence():
         total += self.market_modifier
         return total
 
+ADVISOR_INFLUENCE_PASS = AdvisorInfluence([], [])
+
 ##############################################
 # Game state
 ##############################################
@@ -313,7 +316,7 @@ class State():
         self.phase: int = 0
         self.last_phase_played: int = -1
         self.turn_order: List[str] = []
-        self.taken_advisors = Dict[AdvisorScore, List[str]]
+        self.taken_advisors: Dict[AdvisorScore, List[str]] = {}
 
     def copy(self) -> State:
         return copy.deepcopy(self)
@@ -323,10 +326,8 @@ class State():
         state.messages.append(message)
         return state
 
-    def clearMessages(self) -> State:
-        state = self.copy()
-        state.messages = []
-        return state
+    def clearMessages(self):
+        self.messages = []
 
     def playerList(self) -> List[PlayerState]:
         return [self.players[name] for name in self.players]
@@ -334,6 +335,10 @@ class State():
     def updatePlayer(self, name: str, player: PlayerState) -> State:
         state = self.copy()
         state.players[name] = player
+        messages = player.messages
+        player.clearMessages()
+        for message in messages:
+            state = state.message(message)
         return state
 
     def setPlayers(self, playerNames: List[str]) -> State:
@@ -419,16 +424,8 @@ class State():
         """
         Gives the given resources to the given player.
         """
-        resource_message = []
-        for resource in resources:
-            amount = resources[resource]
-            if amount >= 0:
-                resource_message.append("+" + str(amount) + " " + resource)
-            else:
-                resource_message.append("-" + str(amount) + " " + resource)
-        message = name + ": " + ",".join(resource_message)
         player = self.players[name]
-        return self.message(message).updatePlayer(name, player.addResources(resources))
+        return self.updatePlayer(name, player.addResources(resources))
 
     def giveBuilding(self, name: str, building: Building):
         """
@@ -441,9 +438,8 @@ class State():
         """
         Gives a bonus die to the given player.
         """
-        message = name + " gets King's Favor bonus die"
         player = self.players[name]
-        return self.message(message).updatePlayer(name, player.addKingsFavorBonusDie())
+        return self.updatePlayer(name, player.addKingsFavorBonusDie())
 
     def getNumPlayerDice(self, name: str) -> int:
         """
@@ -473,6 +469,7 @@ class State():
             roll = rolls[name]
             roll.player_dice.sort()
             roll.bonus_dice.sort()
+            # TODO move message to player.roll
             message = name + " rolled player dice: " + ", ".join([str(die) for die in roll.player_dice])
             if len(roll.bonus_dice) > 0:
                 message += ", bonus dice: " + ", ".join([str(die) for die in roll.bonus_dice])
@@ -502,8 +499,20 @@ class State():
                     if name in rollers_by_score[score]:
                         new_turn_order.append(name)
         state.turn_order = new_turn_order
+        state = state.message("Turn order: " + str(state.turn_order))
 
         return state
+
+    def influenceAdvisor(self, name: str, influence: AdvisorInfluence) -> State:
+        # TODO test
+        state = self.copy()
+        if influence == ADVISOR_INFLUENCE_PASS:
+            return state.message(name + " passes")
+        score = influence.advisorScore()
+        influencers = state.taken_advisors[score] if score in state.taken_advisors else []
+        influencers.append(name)
+        state.taken_advisors[score] = influencers
+        return state.updatePlayer(name, state.players[name].influenceAdvisor(influence))
 
     def choices_freeResource(self, name: str) -> List[Resource]:
         """
@@ -512,12 +521,12 @@ class State():
         """
         return RESOURCES
 
-    def choices_advisorInfluence(self, name: str) -> List[AdvisorInfluence]:
+    def choices_advisorInfluenceReward(self, name: str) -> List[AdvisorInfluence]:
         available: List[AdvisorScore] = []
         for advisor in ADVISORS:
             if advisor not in self.taken_advisors:
                 available.append(advisor)
-        return self.players[name].choices_advisorInfluence(available)
+        return self.players[name].choices__advisorInfluenceReward(available)
 
 ##############################################
 # Player state
@@ -529,6 +538,7 @@ class PlayerState():
     """
 
     def __init__(self, name: str):
+        self.messages: List[str] = []
         self.name: str = name
         self.has_kings_favor_bonus_die: bool = False
         self.has_kings_envoy = False
@@ -549,12 +559,25 @@ class PlayerState():
     def copy(self) -> PlayerState:
         return copy.deepcopy(self)
 
+    def message(self, message) -> PlayerState:
+        state = self.copy()
+        state.messages.append(message)
+        return state
+
+    def clearMessages(self):
+        self.messages = []
+
     def addResources(self, resources: ResourceInventory) -> PlayerState:
         """
         Adds the given resources to this player's resources.
         """
         state = self.copy()
         for resource in resources:
+            amount = resources[resource]
+            if amount > 0:
+                state = state.message(self.name + " gains +" + str(amount) + " " + resource)
+            else:
+                state = state.message(self.name + " loses " + str(amount) + " " + resource)
             state.resources[resource] += resources[resource]
         return state
 
@@ -565,6 +588,7 @@ class PlayerState():
         if building in self.buildings:
             raise Exception("Adding an already-owned building")
         state = self.copy()
+        state = state.message(self.name + " gains building " + building)
         state.buildings.append(building)
         return state
 
@@ -573,7 +597,59 @@ class PlayerState():
         Adds a bonus die to this player.
         """
         state = self.copy()
+        state = state.message(self.name + " gains King's Favor bonus die")
         state.has_kings_favor_bonus_die = True
+        return state
+
+    def influenceAdvisor(self, influence: AdvisorInfluence) -> PlayerState:
+        state = self.copy()
+        score = influence.advisorScore()
+        state = state.message(self.name + " influences " + ADVISOR[score].name + " (" + str(score) + ")")
+        state = state.spendDice(influence)
+        if influence.reward is not None:
+            state = state.applyReward(influence.reward)
+        return state
+
+    def spendDice(self, influence: AdvisorInfluence) -> PlayerState:
+        # TODO test
+        state = self.copy()
+        state = state.message(self.name + " spends player dice: " + str(influence.player_dice))
+        state.dice.player_dice = util.list_minus(state.dice.player_dice, influence.player_dice)
+        if len(influence.bonus_dice) > 0:
+            state = state.message(self.name + " spends bonus dice: " + str(influence.bonus_dice))
+            state.dice.bonus_dice = util.list_minus(state.dice.bonus_dice, influence.bonus_dice)
+        if influence.plus_two:
+            state = state.message(self.name + " spends a plustwo")
+            state.plustwo_tokens -= 1
+        if influence.market_modifier == -1:
+            state = state.message(self.name + " uses market -1")
+        if influence.market_modifier == 1:
+            state = state.message(self.name + " uses market +1")
+        return state
+
+    def applyReward(self, reward: Reward) -> PlayerState:
+        """
+        Applies the given reward to this player.
+        """
+        # TODO test
+        state = self.copy()
+        if reward.victory_points < 0:
+            state = state.message(self.name + " loses " + str(reward.victory_points) + " victory points")
+        elif reward.victory_points > 0:
+            state = state.message(self.name + " gains +" + str(reward.victory_points) + " victory points")
+        state.victory_points += reward.victory_points
+        state = state.addResources(reward.resources)
+        if reward.soldiers < 0:
+            state = state.message(self.name + " loses " + str(reward.soldiers) + " soldiers")
+        elif reward.soldiers > 0:
+            state = state.message(self.name + " gains +" + str(reward.soldiers) + " soldiers")
+        state.soldiers += reward.soldiers
+        if reward.plustwos < 0:
+            state = state.message(self.name + " loses " + str(reward.plustwos) + " plustwo tokens")
+        elif reward.plustwos > 0:
+            state = state.message(self.name + " gains +" + str(reward.plustwos) + " plustwo tokens")
+        state.plustwo_tokens += reward.plustwos
+        # TODO view enemy
         return state
 
     def getNumPlayerDice(self, phase: Phase) -> int:
@@ -609,6 +685,10 @@ class PlayerState():
         return state
 
     def choices_advisorInfluence(self, available: List[AdvisorScore]) -> List[AdvisorInfluence]:
+        """
+        Returns the possible advisor influences this player could make.
+        Does not compute all possible rewards.
+        """
         # Determine available market modifiers.
         market_modifiers: List[int] = []
         if not self.used_market and BUILDING_MARKET in self.buildings:
@@ -634,8 +714,8 @@ class PlayerState():
             market_combos
         )
 
-        # Determine valid influences.
-        possible_influences: List[AdvisorInfluence] = []
+        # Determine valid influences. Start with only the "Pass" influence.
+        possible_influences: List[AdvisorInfluence] = [ADVISOR_INFLUENCE_PASS]
         for move in all_possible_moves:
             player_dice: DiceRoll = move[0][0][0]
             bonus_dice: DiceRoll = move[0][0][1]
@@ -658,3 +738,23 @@ class PlayerState():
             possible_influences.append(influence)
 
         return possible_influences
+
+    def choices__advisorInfluenceReward(self, available: List[AdvisorScore]) -> List[AdvisorInfluence]:
+        """
+        Computes all possible advisor influences this player could make,
+        including all possible rewards that could be taken.
+        """
+        choices = []
+        for influence in self.choices_advisorInfluence(available):
+            score = influence.advisorScore()
+            # The "pass" move.
+            if score == 0:
+                cp = copy.deepcopy(influence)
+                choices.append(cp)
+                continue
+            # Add a version of this influence with each possible reward.
+            for reward in ADVISOR[score].choices__rewards(self.resources):
+                cp = copy.deepcopy(influence)
+                cp.reward = reward
+                choices.append(cp)
+        return choices

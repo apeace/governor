@@ -40,6 +40,9 @@ class Engine():
     def rollDice(self, state: kingsburg.State, name: str) -> kingsburg.ProductiveSeasonRoll:
         raise NotImplementedError
 
+    def influenceAdvisor(self, state: kingsburg.State, name: str) -> kingsburg.AdvisorInfluence:
+        raise NotImplementedError
+
 class PlayerEngine(Engine):
     """
     Calls on Player objects to make decisions.
@@ -54,6 +57,9 @@ class PlayerEngine(Engine):
 
     def rollDice(self, state: kingsburg.State, name: str) -> kingsburg.ProductiveSeasonRoll:
         return self.players[name].rollDice(state)
+
+    def influenceAdvisor(self, state: kingsburg.State, name: str) -> kingsburg.AdvisorInfluence:
+        return self.players[name].influenceAdvisor(state)
 
 class CliEngine(PlayerEngine):
     """

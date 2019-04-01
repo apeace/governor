@@ -10,7 +10,7 @@ class Game():
 
     def __init__(self, engine: engine.Engine, state: kingsburg.State):
         self.engine = engine
-        self.state = state
+        self.state: kingsburg.State = state
 
     def play(self):
         """
@@ -38,9 +38,8 @@ class Game():
             self.state = self.state.nextPhase()
             if self.state.over:
                 return True
-            messages = self.state.messages
-            self.state = self.state.clearMessages()
-            self.engine.log(self.state, messages)
+            self.engine.log(self.state, self.state.messages)
+            self.state.clearMessages()
             return False
 
         phase = kingsburg.PHASES[self.state.phase]
@@ -49,9 +48,8 @@ class Game():
         elif phase in kingsburg.PRODUCTIVE_SEASONS:
             self.productiveSeason(phase)
 
-        messages = self.state.messages
-        self.state = self.state.clearMessages()
-        self.engine.log(self.state, messages)
+        self.engine.log(self.state, self.state.messages)
+        self.state.clearMessages()
 
         return False
 
@@ -62,7 +60,7 @@ class Game():
         result = self.state.kingsFavor()
         if result == kingsburg.KINGS_FAVOR_TIE:
             messages = self.state.messages
-            self.state = self.state.clearMessages()
+            self.state.clearMessages()
             messages.append("Kings Favor is a tie")
             self.engine.log(self.state, messages)
             for player in self.state.players:
@@ -85,14 +83,24 @@ class Game():
         for name in self.state.players:
             rolls[name] = self.engine.rollDice(self.state, name)
         self.state = self.state.productiveSeasonRolls(rolls)
-        messages = self.state.messages
-        self.state = self.state.clearMessages()
-        self.engine.log(self.state, messages)
+        self.engine.log(self.state, self.state.messages)
+        self.state.clearMessages()
 
         # TODO Statue & Chapel allow re-rolls
 
-        # TODO influence advisors
-        # TODO king's envoy allows to influence and already-influenced space
+        # Players take turns influencing advisors
+        num_passes = 0
+        while num_passes < len(self.state.turn_order):
+            num_passes = 0
+            for name in self.state.turn_order:
+                influence = self.engine.influenceAdvisor(self.state, name)
+                if influence == kingsburg.ADVISOR_INFLUENCE_PASS:
+                    num_passes += 1
+                self.state = self.state.influenceAdvisor(name, influence)
+            self.engine.log(self.state, self.state.messages)
+            self.state.clearMessages()
+
+        self.engine.log(self.state, "Productive season done")
 
         # TODO construct buildings
         # TODO king's envoy allows to build an additional building

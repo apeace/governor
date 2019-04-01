@@ -227,6 +227,7 @@ def test_choices_advisor_influence__simple():
         bonus_dice=[],
     ))
     expected: List[kingsburg.AdvisorInfluence] = [
+        kingsburg.ADVISOR_INFLUENCE_PASS,
         kingsburg.AdvisorInfluence(
             player_dice=[1],
             bonus_dice=[],
@@ -248,6 +249,7 @@ def test_choices_advisor_influence__simple_with_taken():
         bonus_dice=[],
     ))
     expected: List[kingsburg.AdvisorInfluence] = [
+        kingsburg.ADVISOR_INFLUENCE_PASS,
         kingsburg.AdvisorInfluence(
             player_dice=[1],
             bonus_dice=[],
@@ -261,6 +263,7 @@ def test_choices_advisor_influence__simple2():
         bonus_dice=[],
     ))
     expected: List[kingsburg.AdvisorInfluence] = [
+        kingsburg.ADVISOR_INFLUENCE_PASS,
         kingsburg.AdvisorInfluence(
             player_dice=[1],
             bonus_dice=[],
@@ -298,6 +301,7 @@ def test_choices_advisor_influence__simple2_with_taken():
         bonus_dice=[],
     ))
     expected: List[kingsburg.AdvisorInfluence] = [
+        kingsburg.ADVISOR_INFLUENCE_PASS,
         kingsburg.AdvisorInfluence(
             player_dice=[1],
             bonus_dice=[],
@@ -319,6 +323,7 @@ def test_choices_advisor_influence__withbonus():
         bonus_dice=[1],
     ))
     expected: List[kingsburg.AdvisorInfluence] = [
+        kingsburg.ADVISOR_INFLUENCE_PASS,
         kingsburg.AdvisorInfluence(
             player_dice=[1],
             bonus_dice=[],
@@ -352,6 +357,7 @@ def test_choices_advisor_influence__insanebonus():
         bonus_dice=[6],
     ))
     expected: List[kingsburg.AdvisorInfluence] = [
+        kingsburg.ADVISOR_INFLUENCE_PASS,
         kingsburg.AdvisorInfluence(
             player_dice=[6],
             bonus_dice=[],
@@ -382,6 +388,7 @@ def test_choices_advisor_influence__withbonus_withplustwo():
     ))
     player.plustwo_tokens = 1
     expected: List[kingsburg.AdvisorInfluence] = [
+        kingsburg.ADVISOR_INFLUENCE_PASS,
         kingsburg.AdvisorInfluence(
             player_dice=[1],
             bonus_dice=[],
@@ -446,6 +453,7 @@ def test_choices_advisor_influence__withbonus_withplustwo_withmarket():
     )).addBuilding(kingsburg.BUILDING_MARKET)
     player.plustwo_tokens = 1
     expected: List[kingsburg.AdvisorInfluence] = [
+        kingsburg.ADVISOR_INFLUENCE_PASS,
         kingsburg.AdvisorInfluence(
             player_dice=[1],
             bonus_dice=[],
@@ -663,6 +671,7 @@ def test_choices_advisor_influence__withbonus_withplustwo_withmarket_excluded():
     )).addBuilding(kingsburg.BUILDING_MARKET)
     player.plustwo_tokens = 1
     expected: List[kingsburg.AdvisorInfluence] = [
+        kingsburg.ADVISOR_INFLUENCE_PASS,
         kingsburg.AdvisorInfluence(
             player_dice=[1],
             bonus_dice=[],
@@ -743,6 +752,7 @@ def test_choices_advisor_influence__withbonus_withplustwo_withmarket_excluded_wi
     player.plustwo_tokens = 1
     player.has_kings_envoy = True
     expected: List[kingsburg.AdvisorInfluence] = [
+        kingsburg.ADVISOR_INFLUENCE_PASS,
         kingsburg.AdvisorInfluence(
             player_dice=[1],
             bonus_dice=[],
