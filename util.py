@@ -94,3 +94,24 @@ def tuplize(list):
         else:
             out.append(tuplize(item))
     return tuple(out)
+
+def list_minus(list1: List[int], list2: List[int]):
+    """
+    Subtracts list2 from list1. Example:
+
+        list_minus([1, 1, 1], [1]) ==> [1, 1]
+    """
+    new_list1 = list1[:]
+    new_list1_inprog = []
+    while len(list2) > 0:
+        remove = list2[0]
+        removed = False
+        list2 = list2[1:]
+        for x in new_list1:
+            if not removed and x == remove:
+                removed = True
+                continue
+            new_list1_inprog.append(x)
+        new_list1 = new_list1_inprog
+        new_list1_inprog = []
+    return new_list1

@@ -350,3 +350,16 @@ def test_unique_list_pairs__onebonusandplustwoandmarket():
         print(got[i])
 
     assert got == expected
+
+def test_list_minus():
+    list1 = [1, 1, 1]
+    list2 = [1]
+    assert util.list_minus(list1, list2) == [1, 1]
+
+    list1 = [1, 2, 3]
+    list2 = [2, 3]
+    assert util.list_minus(list1, list2) == [1]
+
+    list1 = [1, 2, 3]
+    list2 = [1, 2, 3]
+    assert util.list_minus(list1, list2) == []
