@@ -342,13 +342,6 @@ def test_unique_list_pairs__onebonusandplustwoandmarket():
         util.unique_combinations(market, 1)
     )
 
-    print("")
-    for i in range(0, 5):
-        print(expected[i])
-    print("")
-    for i in range(0, 5):
-        print(got[i])
-
     assert got == expected
 
 def test_list_minus():
