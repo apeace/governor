@@ -53,6 +53,18 @@ class Game():
             self.kingsFavor()
         elif phase in kingsburg.PRODUCTIVE_SEASONS:
             self.productiveSeason(phase)
+        elif phase == kingsburg.PHASE_KINGS_REWARD:
+            # TODO
+            self.state = self.state.phaseComplete(kingsburg.PHASE_KINGS_REWARD)
+        elif phase == kingsburg.PHASE_KINGS_ENVOY:
+            # TODO
+            self.state = self.state.phaseComplete(kingsburg.PHASE_KINGS_ENVOY)
+        elif phase == kingsburg.PHASE_RECRUIT_SOLDIERS:
+            # TODO
+            self.state = self.state.phaseComplete(kingsburg.PHASE_RECRUIT_SOLDIERS)
+        elif phase == kingsburg.PHASE_WINTER:
+            # TODO
+            self.state = self.state.phaseComplete(kingsburg.PHASE_WINTER)
 
         return False
 
@@ -128,12 +140,12 @@ class Game():
                 self.state = self.state.giveBuilding(name, building, use_kings_envoy=True)
         self.engine.log(self.state, self.state.clearMessages())
 
-        # TODO clear advisor influences
-
         self.engine.log(self.state, "Productive season done")
+        self.state = self.state.clearAdvisorInfluences()
 
         # TODO at end of summer, Inn rewards token thingie
         # TODO Town hall allows trading token for VP
         # TODO Embassy grants VP
 
         self.state = self.state.phaseComplete(phase)
+

@@ -13,6 +13,8 @@ def test_random_game():
     ## TODO actually test some states
     for i in range(0, 5000):
         if g.tick():
-            return
+            break
 
-    assert kingsburg.PHASES[g.state.phase] == kingsburg.PHASE_KINGS_REWARD
+    assert g.state.year == kingsburg.MAX_YEAR
+    assert g.state.phase == kingsburg.MAX_PHASE
+    assert g.state.over

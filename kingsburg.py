@@ -381,6 +381,12 @@ class State():
         self.messages = []
         return messages
 
+    def clearAdvisorInfluences(self) -> State:
+        # TODO test
+        state = self.copy()
+        state.taken_advisors = {}
+        return state
+
     def playerList(self) -> List[PlayerState]:
         return [self.players[name] for name in self.players]
 
@@ -512,6 +518,37 @@ class State():
         for the current productive season.
         """
         return self.players[name].getNumBonusDice(PHASES[self.phase])
+
+    def getWinners(self) -> List[str]:
+        highest_vp_players = []
+        highest_vp = 0
+        highest_resource_players = []
+        highest_resource = 0
+        highest_building_players = []
+        highest_building = 0
+        for p in self.playerList():
+            if p.victory_points == highest_vp:
+                highest_vp_players.append(p.name)
+            elif p.victory_points > highest_vp:
+                highest_vp = p.victory_points
+                highest_vp_players = [p.name]
+            if p.getTotalResources() == highest_resource:
+                highest_resource_players.append(p.name)
+            elif p.getTotalResources() > highest_resource:
+                highest_resource = p.getTotalResources()
+                highest_resource_players = [p.name]
+            if len(p.buildings) == highest_building:
+                highest_building_players.append(p.name)
+            elif len(p.buildings) > highest_building:
+                highest_building = len(p.buildings)
+                highest_building_players = [p.name]
+        if len(highest_vp_players) == 1:
+            return highest_vp_players
+        highest_resource_players = [p for p in highest_resource_players if p in highest_vp_players]
+        if len(highest_resource_players) == 1:
+            return highest_resource_players
+        highest_building_players = [p for p in highest_building_players if p in highest_resource_players]
+        return highest_building_players
 
     def productiveSeasonRolls(self, rolls: Dict[str, ProductiveSeasonRoll]) -> State:
         """
@@ -775,6 +812,9 @@ class PlayerState():
         if BUILDING_FARMS in self.buildings:
             num += 1
         return num
+
+    def getTotalResources(self) -> int:
+        return self.resources[RESOURCE_GOLD] + self.resources[RESOURCE_WOOD] + self.resources[RESOURCE_STONE]
 
     def roll(self, roll: ProductiveSeasonRoll) -> PlayerState:
         """

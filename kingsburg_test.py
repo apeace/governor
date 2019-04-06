@@ -169,6 +169,45 @@ def test_productive_season_rolls__tie_bonus_die():
     })
     assert state.turn_order == ["george", "ron", "fred"]
 
+def test_get_winners__vp():
+    state = kingsburg.State().setPlayers(["fred", "george", "ron"])
+    state.players["fred"].victory_points = 5
+    state.players["george"].victory_points = 4
+    state.players["ron"].victory_points = 3
+    assert state.getWinners() == ["fred"]
+
+def test_get_winners__resources():
+    state = kingsburg.State().setPlayers(["fred", "george", "ron"])
+    state.players["fred"].victory_points = 5
+    state.players["fred"].resources[kingsburg.RESOURCE_GOLD] = 1
+    state.players["george"].victory_points = 5
+    state.players["ron"].victory_points = 5
+    assert state.getWinners() == ["fred"]
+
+def test_get_winners__buildings():
+    state = kingsburg.State().setPlayers(["fred", "george", "ron"])
+    state.players["fred"].victory_points = 5
+    state.players["fred"].resources[kingsburg.RESOURCE_GOLD] = 1
+    state.players["fred"].buildings.append(kingsburg.BUILDING_STABLE)
+    state.players["george"].victory_points = 5
+    state.players["george"].resources[kingsburg.RESOURCE_GOLD] = 1
+    state.players["ron"].victory_points = 5
+    state.players["ron"].resources[kingsburg.RESOURCE_GOLD] = 1
+    assert state.getWinners() == ["fred"]
+
+def test_get_winners__buildings_tie():
+    state = kingsburg.State().setPlayers(["fred", "george", "ron"])
+    state.players["fred"].victory_points = 5
+    state.players["fred"].resources[kingsburg.RESOURCE_GOLD] = 1
+    state.players["fred"].buildings.append(kingsburg.BUILDING_STABLE)
+    state.players["george"].victory_points = 5
+    state.players["george"].resources[kingsburg.RESOURCE_GOLD] = 1
+    state.players["george"].buildings.append(kingsburg.BUILDING_STABLE)
+    state.players["ron"].victory_points = 5
+    state.players["ron"].resources[kingsburg.RESOURCE_GOLD] = 1
+    state.players["ron"].buildings.append(kingsburg.BUILDING_STABLE)
+    assert state.getWinners() == ["fred", "george", "ron"]
+
 ##############################################
 # PlayerState
 ##############################################

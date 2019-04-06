@@ -56,5 +56,6 @@ class StdoutLogger(Logger):
 
     def over(self, state):
         self.startLog()
+        print("Winners: " + str(state.getWinners()))
         print("Game over!")
         self.endLog()
