@@ -983,3 +983,36 @@ def test_spenddice():
     assert player.dice.player_dice == [2, 3]
     assert player.dice.bonus_dice == []
     assert player.plustwo_tokens == 0
+
+def test_applyreward():
+    player = kingsburg.PlayerState("fred").applyReward(kingsburg.Reward(
+        victory_points=2,
+        resources={kingsburg.RESOURCE_STONE: 1},
+        soldiers=2,
+        plustwos=2,
+    ))
+
+    assert player.victory_points == 2
+    assert player.resources == {
+        kingsburg.RESOURCE_STONE: 1,
+        kingsburg.RESOURCE_WOOD: 0,
+        kingsburg.RESOURCE_GOLD: 0
+    }
+    assert player.soldiers == 2
+    assert player.plustwo_tokens == 2
+
+    player = player.applyReward(kingsburg.Reward(
+        victory_points=-1,
+        resources={kingsburg.RESOURCE_STONE: -1, kingsburg.RESOURCE_WOOD: 1},
+        soldiers=-1,
+        plustwos=-1,
+    ))
+
+    assert player.victory_points == 1
+    assert player.resources == {
+        kingsburg.RESOURCE_STONE: 0,
+        kingsburg.RESOURCE_WOOD: 1,
+        kingsburg.RESOURCE_GOLD: 0
+    }
+    assert player.soldiers == 1
+    assert player.plustwo_tokens == 1

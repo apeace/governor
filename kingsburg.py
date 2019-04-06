@@ -628,7 +628,6 @@ class PlayerState():
         """
         Applies the given reward to this player.
         """
-        # TODO test
         state = self.copy()
         if reward.victory_points < 0:
             state = state.message("loses " + str(reward.victory_points) + " victory points")
