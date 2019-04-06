@@ -1,5 +1,5 @@
 import random
-from typing import List
+from typing import List, Optional
 
 import kingsburg
 
@@ -20,7 +20,7 @@ class Player():
     def chooseAdvisor(self, state: kingsburg.State) -> kingsburg.AdvisorInfluence:
         raise NotImplementedError
 
-    def chooseReward(self, state: kingsburg.State, advisorScore: kingsburg.AdvisorScore, possible_rewards: List[kingsburg.Reward]) -> kingsburg.Reward:
+    def chooseReward(self, state: kingsburg.State, advisorScore: kingsburg.AdvisorScore, possible_rewards: List[kingsburg.Reward]) -> Optional[kingsburg.Reward]:
         raise NotImplementedError
 
     def chooseBuilding(self, state: kingsburg.State, choices: List[kingsburg.Building], use_kings_envoy: bool) -> kingsburg.Building:
@@ -58,7 +58,7 @@ class CliPlayer(Player):
         # TODO
         return kingsburg.ADVISOR_INFLUENCE_PASS
 
-    def chooseReward(self, state: kingsburg.State, advisorScore: kingsburg.AdvisorScore, possible_rewards: List[kingsburg.Reward]) -> kingsburg.Reward:
+    def chooseReward(self, state: kingsburg.State, advisorScore: kingsburg.AdvisorScore, possible_rewards: List[kingsburg.Reward]) -> Optional[kingsburg.Reward]:
         # TODO
         raise NotImplementedError
 
@@ -90,7 +90,9 @@ class RandomPlayer(Player):
     def chooseAdvisor(self, state: kingsburg.State) -> kingsburg.AdvisorInfluence:
         return random.choice(state.choices__advisorInfluence(self.name))
 
-    def chooseReward(self, state: kingsburg.State, advisorScore: kingsburg.AdvisorScore, possible_rewards: List[kingsburg.Reward]) -> kingsburg.Reward:
+    def chooseReward(self, state: kingsburg.State, advisorScore: kingsburg.AdvisorScore, possible_rewards: List[kingsburg.Reward]) -> Optional[kingsburg.Reward]:
+        if len(possible_rewards) == 0:
+            return None
         return random.choice(possible_rewards)
 
     def chooseBuilding(self, state: kingsburg.State, choices: List[kingsburg.Building], use_kings_envoy: bool) -> kingsburg.Building:

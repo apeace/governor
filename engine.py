@@ -1,4 +1,4 @@
-from typing import Union, List, Dict
+from typing import Union, List, Dict, Optional
 
 import kingsburg
 import player
@@ -42,7 +42,7 @@ class Engine():
     def chooseAdvisor(self, state: kingsburg.State, name: str) -> kingsburg.AdvisorInfluence:
         raise NotImplementedError
 
-    def chooseReward(self, state: kingsburg.State, name: str, advisorScore: kingsburg.AdvisorScore, possible_rewards: List[kingsburg.Reward]) -> kingsburg.Reward:
+    def chooseReward(self, state: kingsburg.State, name: str, advisorScore: kingsburg.AdvisorScore, possible_rewards: List[kingsburg.Reward]) -> Optional[kingsburg.Reward]:
         raise NotImplementedError
 
     def chooseBuilding(self, state: kingsburg.State, name: str, use_kings_envoy: bool) -> kingsburg.Building:
@@ -69,7 +69,7 @@ class PlayerEngine(Engine):
     def chooseAdvisor(self, state: kingsburg.State, name: str) -> kingsburg.AdvisorInfluence:
         return self.players[name].chooseAdvisor(state)
 
-    def chooseReward(self, state: kingsburg.State, name: str, advisorScore: kingsburg.AdvisorScore, possible_rewards: List[kingsburg.Reward]) -> kingsburg.Reward:
+    def chooseReward(self, state: kingsburg.State, name: str, advisorScore: kingsburg.AdvisorScore, possible_rewards: List[kingsburg.Reward]) -> Optional[kingsburg.Reward]:
         return self.players[name].chooseReward(state, advisorScore, possible_rewards)
 
     def chooseBuilding(self, state: kingsburg.State, name: str, use_kings_envoy: bool) -> kingsburg.Building:
@@ -129,7 +129,7 @@ class RandomCliEngine(CliEngine, RandomEngine):
     def setupPlayers(self):
         return RandomEngine.setupPlayers(self)
 
-    def chooseReward(self, state: kingsburg.State, name: str, advisorScore: kingsburg.AdvisorScore, possible_rewards: List[kingsburg.Reward]) -> kingsburg.Reward:
+    def chooseReward(self, state: kingsburg.State, name: str, advisorScore: kingsburg.AdvisorScore, possible_rewards: List[kingsburg.Reward]) -> Optional[kingsburg.Reward]:
         return RandomEngine.chooseReward(self, state, name, advisorScore, possible_rewards)
 
     def chooseBuilding(self, state: kingsburg.State, name: str, use_kings_envoy: bool) -> kingsburg.Building:

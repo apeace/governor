@@ -1,4 +1,4 @@
-from typing import Dict, Set
+from typing import Dict, Set, Optional
 
 import engine
 import kingsburg
@@ -123,13 +123,15 @@ class Game():
                     # In fact make engine list the possible stuff for every move
                     # That way it can be fed into both CliPlayer and RandomPlayer
                     possible_rewards = kingsburg.ADVISOR[advisorScore].choices__rewards(self.state.players[name].resources)
+                    reward: Optional[kingsburg.Reward] = None
                     if len(possible_rewards) == 1:
                         reward = possible_rewards[0]
                     else:
                         self.engine.log(self.state, self.state.clearMessages())
                         reward = self.engine.chooseReward(self.state, name, advisorScore, possible_rewards)
-                    # TODO view enemies
-                    self.state = self.state.giveReward(name, advisorScore, reward)
+                    if reward is not None:
+                        # TODO view enemies
+                        self.state = self.state.giveReward(name, advisorScore, reward)
         self.engine.log(self.state, self.state.clearMessages())
 
         # In turn order, players construct buildings.
