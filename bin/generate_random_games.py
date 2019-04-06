@@ -30,6 +30,7 @@ if __name__ == "__main__":
     if len(sys.argv) != 4:
         print("Usage:")
         print("python -m bin.generate_random_games <num> <batchsize> <dir>")
+        sys.exit(1)
 
     num = int(sys.argv[1])
     batchsize = int(sys.argv[2])
