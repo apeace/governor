@@ -20,6 +20,9 @@ class Player():
     def influenceAdvisor(self, state: kingsburg.State) -> kingsburg.AdvisorInfluence:
         raise NotImplementedError
 
+    def chooseReward(self, state: kingsburg.State, advisorScore: kingsburg.AdvisorScore, possible_rewards: List[kingsburg.Reward]) -> kingsburg.Reward:
+        raise NotImplementedError
+
 class CliPlayer(Player):
     """
     A player which asks for choices via CLI.
@@ -52,6 +55,10 @@ class CliPlayer(Player):
         # TODO
         return kingsburg.ADVISOR_INFLUENCE_PASS
 
+    def chooseReward(self, state: kingsburg.State, advisorScore: kingsburg.AdvisorScore, possible_rewards: List[kingsburg.Reward]) -> kingsburg.Reward:
+        # TODO
+        raise NotImplementedError
+
 class RandomPlayer(Player):
     """
     A player which makes completely random choices.
@@ -75,3 +82,6 @@ class RandomPlayer(Player):
 
     def influenceAdvisor(self, state: kingsburg.State) -> kingsburg.AdvisorInfluence:
         return random.choice(state.choices_advisorInfluence(self.name))
+
+    def chooseReward(self, state: kingsburg.State, advisorScore: kingsburg.AdvisorScore, possible_rewards: List[kingsburg.Reward]) -> kingsburg.Reward:
+        return random.choice(possible_rewards)

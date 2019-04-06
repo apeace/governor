@@ -510,6 +510,13 @@ class State():
         state.taken_advisors[score] = influencers
         return state.updatePlayer(name, state.players[name].influenceAdvisor(influence))
 
+    def giveReward(self, name: str, advisor_score: AdvisorScore, reward: Reward) -> State:
+        # TODO test
+        state = self.copy()
+        state = state.updatePlayer(name, state.players[name].applyReward(reward))
+        state.taken_advisors[advisor_score] = [n for n in state.taken_advisors[advisor_score] if n != name]
+        return state
+
     def choices_freeResource(self, name: str) -> List[Resource]:
         """
         Returns the list of resources available to the given player
@@ -743,23 +750,3 @@ class PlayerState():
             possible_influences.append(influence)
 
         return possible_influences
-
-    def choices__advisorInfluenceReward(self, available: List[AdvisorScore]) -> List[AdvisorInfluence]:
-        """
-        Computes all possible advisor influences this player could make,
-        including all possible rewards that could be taken.
-        """
-        choices = []
-        for influence in self.choices_advisorInfluence(available):
-            score = influence.advisorScore()
-            # The "pass" move.
-            if score == 0:
-                cp = copy.deepcopy(influence)
-                choices.append(cp)
-                continue
-            # Add a version of this influence with each possible reward.
-            for reward in ADVISOR[score].choices__rewards(self.resources):
-                cp = copy.deepcopy(influence)
-                cp.reward = reward
-                choices.append(cp)
-        return choices

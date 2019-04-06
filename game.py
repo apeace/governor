@@ -12,7 +12,7 @@ class Game():
         # TODO it appears to be impossible to specify the type of self.engine
         # TODO also, self.state does not appear to be type-checked
         self.engine = engine
-        self.state: kingsburg.State = state
+        self.state = state
 
     def play(self):
         """
@@ -86,26 +86,36 @@ class Game():
 
         # TODO Statue & Chapel allow re-rolls
 
-        # Players take turns influencing advisors until each player passes
+        # Players take turns influencing advisors until each player passes.
         passes: Set[str] = set()
         while len(passes) < len(self.state.turn_order):
             for name in self.state.turn_order:
                 if name in passes:
                     continue
-                # TODO only advisor
                 influence = self.engine.influenceAdvisor(self.state, name)
                 if influence == kingsburg.ADVISOR_INFLUENCE_PASS:
                     passes.add(name)
-                # TODO only advisor
                 self.state = self.state.influenceAdvisor(name, influence)
             self.engine.log(self.state, self.state.clearMessages())
 
-        # TODO receive rewards
-
-        self.engine.log(self.state, "Productive season done")
+        # Players take their rewards in order of advisor score.
+        for advisorScore in kingsburg.ADVISORS:
+            if advisorScore in self.state.taken_advisors:
+                for name in self.state.taken_advisors[advisorScore]:
+                    possible_rewards = kingsburg.ADVISOR[advisorScore].choices__rewards(self.state.players[name].resources)
+                    if len(possible_rewards) == 1:
+                        reward = possible_rewards[0]
+                    else:
+                        self.engine.log(self.state, self.state.clearMessages())
+                        reward = self.engine.chooseReward(self.state, name, advisorScore, possible_rewards)
+                    # TODO view enemies
+                    self.state = self.state.giveReward(name, advisorScore, reward)
+        self.engine.log(self.state, self.state.clearMessages())
 
         # TODO construct buildings
         # TODO king's envoy allows to build an additional building
+
+        self.engine.log(self.state, "Productive season done")
 
         # TODO at end of summer, Inn rewards token thingie
         # TODO Town hall allows trading token for VP

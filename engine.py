@@ -43,6 +43,9 @@ class Engine():
     def influenceAdvisor(self, state: kingsburg.State, name: str) -> kingsburg.AdvisorInfluence:
         raise NotImplementedError
 
+    def chooseReward(self, state: kingsburg.State, name: str, advisorScore: kingsburg.AdvisorScore, possible_rewards: List[kingsburg.Reward]) -> kingsburg.Reward:
+        raise NotImplementedError
+
 class PlayerEngine(Engine):
     """
     Calls on Player objects to make decisions.
@@ -60,6 +63,9 @@ class PlayerEngine(Engine):
 
     def influenceAdvisor(self, state: kingsburg.State, name: str) -> kingsburg.AdvisorInfluence:
         return self.players[name].influenceAdvisor(state)
+
+    def chooseReward(self, state: kingsburg.State, name: str, advisorScore: kingsburg.AdvisorScore, possible_rewards: List[kingsburg.Reward]) -> kingsburg.Reward:
+        return self.players[name].chooseReward(state, advisorScore, possible_rewards)
 
 class CliEngine(PlayerEngine):
     """
@@ -92,7 +98,7 @@ class RandomEngine(PlayerEngine):
     """
 
     def getPlayers(self):
-        names =["fred", "george", "ron"]
+        names = ["fred", "george", "ron"]
         for name in names:
             self.players[name] = player.RandomPlayer(name)
         return names
@@ -114,3 +120,6 @@ class RandomCliEngine(CliEngine, RandomEngine):
 
     def getPlayers(self):
         return RandomEngine.getPlayers(self)
+
+    def chooseReward(self, state: kingsburg.State, name: str, advisorScore: kingsburg.AdvisorScore, possible_rewards: List[kingsburg.Reward]) -> kingsburg.Reward:
+        return RandomEngine.chooseReward(self, state, name, advisorScore, possible_rewards)
