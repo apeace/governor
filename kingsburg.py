@@ -470,11 +470,6 @@ class State():
             roll = rolls[name]
             roll.player_dice.sort()
             roll.bonus_dice.sort()
-            # TODO move message to player.roll
-            message = name + " rolled player dice: " + ", ".join([str(die) for die in roll.player_dice])
-            if len(roll.bonus_dice) > 0:
-                message += ", bonus dice: " + ", ".join([str(die) for die in roll.bonus_dice])
-            state = state.message(message)
             state = state.updatePlayer(name, player.roll(roll))
 
         # Set turn order. The lowest total roll goes first.
@@ -685,6 +680,10 @@ class PlayerState():
         state = self.copy()
         state.dice = copy.deepcopy(roll)
         state.has_kings_favor_bonus_die = False
+        message = "rolled player dice: " + ", ".join([str(die) for die in roll.player_dice])
+        if len(roll.bonus_dice) > 0:
+            message += ", bonus dice: " + ", ".join([str(die) for die in roll.bonus_dice])
+        state = state.message(message)
         return state
 
     def choices_advisorInfluence(self, available: List[AdvisorScore]) -> List[AdvisorInfluence]:
