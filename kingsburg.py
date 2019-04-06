@@ -326,8 +326,10 @@ class State():
         state.messages.append(message)
         return state
 
-    def clearMessages(self):
+    def clearMessages(self) -> List[str]:
+        messages = self.messages
         self.messages = []
+        return messages
 
     def playerList(self) -> List[PlayerState]:
         return [self.players[name] for name in self.players]
@@ -335,8 +337,7 @@ class State():
     def updatePlayer(self, name: str, player: PlayerState) -> State:
         state = self.copy()
         state.players[name] = player
-        messages = player.messages
-        player.clearMessages()
+        messages = player.clearMessages()
         for message in messages:
             state = state.message(message)
         return state
@@ -559,13 +560,15 @@ class PlayerState():
     def copy(self) -> PlayerState:
         return copy.deepcopy(self)
 
-    def message(self, message) -> PlayerState:
+    def message(self, message: str) -> PlayerState:
         state = self.copy()
-        state.messages.append(message)
+        state.messages.append(self.name + " " + message)
         return state
 
-    def clearMessages(self):
+    def clearMessages(self) -> List[str]:
+        messages = self.messages
         self.messages = []
+        return messages
 
     def addResources(self, resources: ResourceInventory) -> PlayerState:
         """
@@ -575,9 +578,9 @@ class PlayerState():
         for resource in resources:
             amount = resources[resource]
             if amount > 0:
-                state = state.message(self.name + " gains +" + str(amount) + " " + resource)
+                state = state.message("gains +" + str(amount) + " " + resource)
             else:
-                state = state.message(self.name + " loses " + str(amount) + " " + resource)
+                state = state.message("loses " + str(amount) + " " + resource)
             state.resources[resource] += resources[resource]
         return state
 
@@ -588,7 +591,7 @@ class PlayerState():
         if building in self.buildings:
             raise Exception("Adding an already-owned building")
         state = self.copy()
-        state = state.message(self.name + " gains building " + building)
+        state = state.message("gains building " + building)
         state.buildings.append(building)
         return state
 
@@ -597,14 +600,14 @@ class PlayerState():
         Adds a bonus die to this player.
         """
         state = self.copy()
-        state = state.message(self.name + " gains King's Favor bonus die")
+        state = state.message("gains King's Favor bonus die")
         state.has_kings_favor_bonus_die = True
         return state
 
     def influenceAdvisor(self, influence: AdvisorInfluence) -> PlayerState:
         state = self.copy()
         score = influence.advisorScore()
-        state = state.message(self.name + " influences " + ADVISOR[score].name + " (" + str(score) + ")")
+        state = state.message("influences " + ADVISOR[score].name + " (" + str(score) + ")")
         state = state.spendDice(influence)
         if influence.reward is not None:
             state = state.applyReward(influence.reward)
@@ -613,18 +616,18 @@ class PlayerState():
     def spendDice(self, influence: AdvisorInfluence) -> PlayerState:
         # TODO test
         state = self.copy()
-        state = state.message(self.name + " spends player dice: " + str(influence.player_dice))
+        state = state.message("spends player dice: " + str(influence.player_dice))
         state.dice.player_dice = util.list_minus(state.dice.player_dice, influence.player_dice)
         if len(influence.bonus_dice) > 0:
-            state = state.message(self.name + " spends bonus dice: " + str(influence.bonus_dice))
+            state = state.message("spends bonus dice: " + str(influence.bonus_dice))
             state.dice.bonus_dice = util.list_minus(state.dice.bonus_dice, influence.bonus_dice)
         if influence.plus_two:
-            state = state.message(self.name + " spends a plustwo")
+            state = state.message("spends a plustwo")
             state.plustwo_tokens -= 1
         if influence.market_modifier == -1:
-            state = state.message(self.name + " uses market -1")
+            state = state.message("uses market -1")
         if influence.market_modifier == 1:
-            state = state.message(self.name + " uses market +1")
+            state = state.message("uses market +1")
         return state
 
     def applyReward(self, reward: Reward) -> PlayerState:
@@ -634,20 +637,20 @@ class PlayerState():
         # TODO test
         state = self.copy()
         if reward.victory_points < 0:
-            state = state.message(self.name + " loses " + str(reward.victory_points) + " victory points")
+            state = state.message("loses " + str(reward.victory_points) + " victory points")
         elif reward.victory_points > 0:
-            state = state.message(self.name + " gains +" + str(reward.victory_points) + " victory points")
+            state = state.message("gains +" + str(reward.victory_points) + " victory points")
         state.victory_points += reward.victory_points
         state = state.addResources(reward.resources)
         if reward.soldiers < 0:
-            state = state.message(self.name + " loses " + str(reward.soldiers) + " soldiers")
+            state = state.message("loses " + str(reward.soldiers) + " soldiers")
         elif reward.soldiers > 0:
-            state = state.message(self.name + " gains +" + str(reward.soldiers) + " soldiers")
+            state = state.message("gains +" + str(reward.soldiers) + " soldiers")
         state.soldiers += reward.soldiers
         if reward.plustwos < 0:
-            state = state.message(self.name + " loses " + str(reward.plustwos) + " plustwo tokens")
+            state = state.message("loses " + str(reward.plustwos) + " plustwo tokens")
         elif reward.plustwos > 0:
-            state = state.message(self.name + " gains +" + str(reward.plustwos) + " plustwo tokens")
+            state = state.message("gains +" + str(reward.plustwos) + " plustwo tokens")
         state.plustwo_tokens += reward.plustwos
         # TODO view enemy
         return state

@@ -30,16 +30,16 @@ class Game():
         self.state = self.state.setPlayers(self.engine.getPlayers())
         self.engine.start(self.state)
 
-    def tick(self):
+    def tick(self) -> bool:
         """
         Advance to the next step of the game.
+        Returns True if the game is over.
         """
         if self.state.last_phase_played == self.state.phase:
             self.state = self.state.nextPhase()
             if self.state.over:
                 return True
-            self.engine.log(self.state, self.state.messages)
-            self.state.clearMessages()
+            self.engine.log(self.state, self.state.clearMessages())
             return False
 
         phase = kingsburg.PHASES[self.state.phase]
@@ -47,9 +47,6 @@ class Game():
             self.kingsFavor()
         elif phase in kingsburg.PRODUCTIVE_SEASONS:
             self.productiveSeason(phase)
-
-        self.engine.log(self.state, self.state.messages)
-        self.state.clearMessages()
 
         return False
 
@@ -59,8 +56,7 @@ class Game():
         """
         result = self.state.kingsFavor()
         if result == kingsburg.KINGS_FAVOR_TIE:
-            messages = self.state.messages
-            self.state.clearMessages()
+            messages = self.state.clearMessages()
             messages.append("Kings Favor is a tie")
             self.engine.log(self.state, messages)
             for player in self.state.players:
@@ -83,8 +79,7 @@ class Game():
         for name in self.state.players:
             rolls[name] = self.engine.rollDice(self.state, name)
         self.state = self.state.productiveSeasonRolls(rolls)
-        self.engine.log(self.state, self.state.messages)
-        self.state.clearMessages()
+        self.engine.log(self.state, self.state.clearMessages())
 
         # TODO Statue & Chapel allow re-rolls
 
@@ -99,8 +94,7 @@ class Game():
                 if influence == kingsburg.ADVISOR_INFLUENCE_PASS:
                     passes.add(name)
                 self.state = self.state.influenceAdvisor(name, influence)
-            self.engine.log(self.state, self.state.messages)
-            self.state.clearMessages()
+            self.engine.log(self.state, self.state.clearMessages())
 
         self.engine.log(self.state, "Productive season done")
 
