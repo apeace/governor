@@ -130,7 +130,7 @@ class TrainingDataEngine(RandomEngine):
             self.states.append(new_state.toDict())
         return choice
 
-    def chooseReward(self, state: kingsburg.State, name: str, advisorScore: kingsburg.AdvisorScore, possible_rewards: List[kingsburg.Reward]) -> kingsburg.Reward:
+    def chooseReward(self, state: kingsburg.State, name: str, advisorScore: kingsburg.AdvisorScore, possible_rewards: List[kingsburg.Reward]) -> Optional[kingsburg.Reward]:
         choice = RandomEngine.chooseReward(self, state, name, advisorScore, possible_rewards)
         if name == "fred" and choice is not None:
             new_state = state.giveReward(name, advisorScore, choice)
