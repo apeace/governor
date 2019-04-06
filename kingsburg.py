@@ -374,6 +374,21 @@ class State():
         d["players"] = [p.toDict() for p in self.playerList()]
         return d
 
+    # TODO make static method
+    def fromDict(self, d):
+        self.messages = []
+        self.players = {}
+        for p in d["players"]:
+            player = PlayerState("foo").fromDict(p)
+            self.players[player.name] = player
+        self.over = d["over"]
+        self.year = d["year"]
+        self.phase = d["phase"]
+        self.last_phase_played = d["last_phase_played"]
+        self.turn_order = d["turn_order"]
+        self.taken_advisors = d["taken_advisors"]
+        return self
+
     def copy(self) -> State:
         return copy.deepcopy(self)
 
@@ -655,6 +670,8 @@ class PlayerState():
         self.name: str = name
         self.has_kings_favor_bonus_die: bool = False
         self.has_kings_envoy = False
+        # TODO get rid of this.
+        # Should get taken away when influencing an advisor with it.
         self.used_kings_envoy = False
         self.plustwo_tokens = 0
         self.used_plustwo_token = False
@@ -673,6 +690,25 @@ class PlayerState():
         d = self.__dict__
         d['dice'] = self.dice.__dict__
         return d
+
+    # TODO make static method
+    def fromDict(self, d):
+        self.messages = []
+        self.name = d["name"]
+        self.has_kings_favor_bonus_die = d["has_kings_favor_bonus_die"]
+        self.has_kings_envoy = d["has_kings_envoy"]
+        self.plustwo_tokens = d["plustwo_tokens"]
+        self.used_plustwo_token = d["used_plustwo_token"]
+        self.used_market = d["used_market"]
+        self.buildings = d["buildings"]
+        self.resources = d["resources"]
+        self.victory_points = d["victory_points"]
+        self.soldiers = d["soldiers"]
+        self.dice = ProductiveSeasonRoll(
+            player_dice=d["dice"]["player_dice"],
+            bonus_dice=d["dice"]["bonus_dice"],
+        )
+        return self
 
     def copy(self) -> PlayerState:
         return copy.deepcopy(self)
