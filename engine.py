@@ -111,6 +111,47 @@ class RandomEngine(PlayerEngine):
             self.players[name] = player.RandomPlayer(name)
         return names
 
+class TrainingDataEngine(RandomEngine):
+    def __init__(self, logger: logger.Logger):
+        RandomEngine.__init__(self, logger)
+        self.states: List[kingsburg.State] = []
+
+    def pickFreeResource(self, state: kingsburg.State, name: str) -> str:
+        choice = RandomEngine.pickFreeResource(self, state, name)
+        if name == "fred":
+            new_state = state.takeFreeResource(name, choice)
+            self.states.append(new_state.toDict())
+        return choice
+
+    def chooseAdvisor(self, state: kingsburg.State, name: str) -> kingsburg.AdvisorInfluence:
+        choice = RandomEngine.chooseAdvisor(self, state, name)
+        if name == "fred":
+            new_state = state.influenceAdvisor(name, choice)
+            self.states.append(new_state.toDict())
+        return choice
+
+    def chooseReward(self, state: kingsburg.State, name: str, advisorScore: kingsburg.AdvisorScore, possible_rewards: List[kingsburg.Reward]) -> kingsburg.Reward:
+        choice = RandomEngine.chooseReward(self, state, name, advisorScore, possible_rewards)
+        if name == "fred" and choice is not None:
+            new_state = state.giveReward(name, advisorScore, choice)
+            self.states.append(new_state.toDict())
+        return choice
+
+    def chooseBuilding(self, state: kingsburg.State, name: str, use_kings_envoy: bool) -> kingsburg.Building:
+        choice = RandomEngine.chooseBuilding(self, state, name, use_kings_envoy)
+        if name == "fred":
+            new_state = state.giveBuilding(name, choice, use_kings_envoy)
+            self.states.append(new_state.toDict())
+        return choice
+
+    def won(self, state: kingsburg.State) -> float:
+        winners = state.getWinners()
+        if "fred" not in winners:
+            return 0
+        if len(winners) > 1:
+            return 0.8
+        return 1
+
 class RandomCliEngine(CliEngine, RandomEngine):
     """
     Play the game with automated random players.
