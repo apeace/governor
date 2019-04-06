@@ -108,6 +108,54 @@ PROVINCE_SHEET: List[List[Building]] = [
     [BUILDING_BARRICADE, BUILDING_CRANE, BUILDING_TOWN_HALL, BUILDING_EMBASSY],
 ]
 
+BUILD_PASS: Building = "pass"
+
+BUILDING_VP: Dict[Building, int] = {
+    BUILDING_STATUE: 3,
+    BUILDING_CHAPEL: 5,
+    BUILDING_CHURCH: 7,
+    BUILDING_CATHEDRAL: 9,
+    BUILDING_INN: 0,
+    BUILDING_MARKET: 1,
+    BUILDING_FARMS: 2,
+    BUILDING_MERCHANTS_GUILD: 4,
+    BUILDING_GUARD_TOWER: 1,
+    BUILDING_BLACKSMITH: 2,
+    BUILDING_BARRACKS: 4,
+    BUILDING_WIZARDS_GUILD: 6,
+    BUILDING_PALISADE: 0,
+    BUILDING_STABLE: 2,
+    BUILDING_STONE_WALL: 2,
+    BUILDING_FORTRESS: 4,
+    BUILDING_BARRICADE: 0,
+    BUILDING_CRANE: 1,
+    BUILDING_TOWN_HALL: 2,
+    BUILDING_EMBASSY: 4,
+}
+
+BUILDING_COST: Dict[Building, ResourceInventory] = {
+    BUILDING_STATUE: {RESOURCE_GOLD: -2},
+    BUILDING_CHAPEL: {RESOURCE_GOLD: -3, RESOURCE_STONE: -1},
+    BUILDING_CHURCH: {RESOURCE_GOLD: -3, RESOURCE_WOOD: -1, RESOURCE_STONE: -2},
+    BUILDING_CATHEDRAL: {RESOURCE_GOLD: -5, RESOURCE_STONE: -3},
+    BUILDING_INN: {RESOURCE_GOLD: -1, RESOURCE_WOOD: -1},
+    BUILDING_MARKET: {RESOURCE_GOLD: -2, RESOURCE_WOOD: -2},
+    BUILDING_FARMS: {RESOURCE_GOLD: -2, RESOURCE_WOOD: -3, RESOURCE_STONE: -1},
+    BUILDING_MERCHANTS_GUILD: {RESOURCE_GOLD: -3, RESOURCE_WOOD: -1, RESOURCE_STONE: -2},
+    BUILDING_GUARD_TOWER: {RESOURCE_GOLD: -1, RESOURCE_STONE: -1},
+    BUILDING_BLACKSMITH: {RESOURCE_GOLD: -1, RESOURCE_WOOD: -2},
+    BUILDING_BARRACKS: {RESOURCE_GOLD: -2, RESOURCE_WOOD: -2, RESOURCE_STONE: -1},
+    BUILDING_WIZARDS_GUILD: {RESOURCE_GOLD: -3, RESOURCE_WOOD: -2, RESOURCE_STONE: -2},
+    BUILDING_PALISADE: {RESOURCE_WOOD: -2},
+    BUILDING_STABLE: {RESOURCE_GOLD: -1, RESOURCE_WOOD: -1, RESOURCE_STONE: -1},
+    BUILDING_STONE_WALL: {RESOURCE_GOLD: -2, RESOURCE_STONE: -2},
+    BUILDING_FORTRESS: {RESOURCE_GOLD: -3, RESOURCE_STONE: -2},
+    BUILDING_BARRICADE: {RESOURCE_WOOD: -1},
+    BUILDING_CRANE: {RESOURCE_WOOD: -1, RESOURCE_STONE: -1},
+    BUILDING_TOWN_HALL: {RESOURCE_GOLD: -2, RESOURCE_WOOD: -1, RESOURCE_STONE: -1},
+    BUILDING_EMBASSY: {RESOURCE_GOLD: -2, RESOURCE_WOOD: -2, RESOURCE_STONE: -2},
+}
+
 ##############################################
 # Phases
 ##############################################
@@ -228,6 +276,8 @@ ADVISOR = {
     ADVISOR_QUEEN: Advisor("queen", [Reward(receive_any_resource=2, view_enemy=True, victory_points=3)]),
     ADVISOR_KING: Advisor("king", [Reward(resources={RESOURCE_GOLD: 1, RESOURCE_WOOD: 1, RESOURCE_STONE: 1}, soldiers=1)]),
 }
+
+ADVISORS_STABLE = [score for score in ADVISORS if ADVISOR[score].rewards[0].soldiers > 0]
 
 ##############################################
 # Die
@@ -428,12 +478,19 @@ class State():
         player = self.players[name]
         return self.updatePlayer(name, player.addResources(resources))
 
-    def giveBuilding(self, name: str, building: Building):
+    def giveBuilding(self, name: str, building: Building, use_kings_envoy: bool):
         """
         Gives the given building to the given player.
         """
-        player = self.players[name]
-        return self.updatePlayer(name, player.addBuilding(building))
+        state = self.copy()
+        player_advisors: List[AdvisorScore] = []
+        for score in ADVISORS:
+            if score in self.taken_advisors and name in self.taken_advisors[score]:
+                player_advisors.append(score)
+        state = state.updatePlayer(name, state.players[name].addBuilding(building, player_advisors))
+        if building != BUILD_PASS and use_kings_envoy:
+            state = state.updatePlayer(name, state.players[name].useKingsEnvoy())
+        return state
 
     def giveKingsFavorBonusDie(self, name: str):
         """
@@ -515,7 +572,6 @@ class State():
         state = self.copy()
         state = state.message(name + " takes reward from " + ADVISOR[advisor_score].name + " (" + str(advisor_score) + ")")
         state = state.updatePlayer(name, state.players[name].applyReward(reward))
-        state.taken_advisors[advisor_score] = [n for n in state.taken_advisors[advisor_score] if n != name]
         return state
 
     def choices_freeResource(self, name: str) -> List[Resource]:
@@ -536,6 +592,12 @@ class State():
             if advisor not in self.taken_advisors:
                 available.append(advisor)
         return self.players[name].choices_advisorInfluence(available)
+
+    def choices__buildings(self, name: str) -> List[Building]:
+        """
+        Returns the list of buildings that the given player can build.
+        """
+        return self.players[name].choices__buildings()
 
 ##############################################
 # Player state
@@ -578,6 +640,30 @@ class PlayerState():
         self.messages = []
         return messages
 
+    def addVictoryPoints(self, victory_points: int) -> PlayerState:
+        """
+        Adds the given victory points to the player.
+        """
+        state = self.copy()
+        state.victory_points += victory_points
+        if victory_points >= 0:
+            state = state.message("gains +" + str(victory_points) + " victory points")
+        else:
+            state = state.message("loses -" + str(victory_points) + " victory points")
+        return state
+
+    def addSoldiers(self, soldiers: int) -> PlayerState:
+        """
+        Adds the given number of soliders to the player.
+        """
+        state = self.copy()
+        state.soldiers += soldiers
+        if soldiers >= 0:
+            state = state.message("gains +" + str(soldiers) + " soldiers")
+        else:
+            state = state.message("loses -" + str(soldiers) + " soldiers")
+        return state
+
     def addResources(self, resources: ResourceInventory) -> PlayerState:
         """
         Adds the given resources to this player's resources.
@@ -592,15 +678,29 @@ class PlayerState():
             state.resources[resource] += resources[resource]
         return state
 
-    def addBuilding(self, building: Building) -> PlayerState:
+    def addBuilding(self, building: Building, player_advisors: List[AdvisorScore]) -> PlayerState:
         """
         Adds the given building to this player's buildings.
+        Subtract the cost of the building from the player's resources.
+        Give the player victory points for the building.
+        Special rule for buying Stable.
         """
         if building in self.buildings:
             raise Exception("Adding an already-owned building")
         state = self.copy()
+        if building == BUILD_PASS:
+            return state.message("passes")
         state = state.message("gains building " + building)
         state.buildings.append(building)
+        state = state.addResources(BUILDING_COST[building])
+        state = state.addVictoryPoints(BUILDING_VP[building])
+        if building == BUILDING_STABLE:
+            for advisor in ADVISORS_STABLE:
+                if advisor in player_advisors:
+                    state = state.message("Stable gives +1 solidier when influencing an advisor giving you at least 1 soldier")
+                    state = state.addSoldiers(1)
+                    break
+            pass
         return state
 
     def addKingsFavorBonusDie(self) -> PlayerState:
@@ -641,17 +741,11 @@ class PlayerState():
         Applies the given reward to this player.
         """
         state = self.copy()
-        if reward.victory_points < 0:
-            state = state.message("loses " + str(reward.victory_points) + " victory points")
-        elif reward.victory_points > 0:
-            state = state.message("gains +" + str(reward.victory_points) + " victory points")
-        state.victory_points += reward.victory_points
+        if reward.victory_points != 0:
+            state = state.addVictoryPoints(reward.victory_points)
         state = state.addResources(reward.resources)
-        if reward.soldiers < 0:
-            state = state.message("loses " + str(reward.soldiers) + " soldiers")
-        elif reward.soldiers > 0:
-            state = state.message("gains +" + str(reward.soldiers) + " soldiers")
-        state.soldiers += reward.soldiers
+        if reward.soldiers != 0:
+            state = state.addSoldiers(reward.soldiers)
         if reward.plustwos < 0:
             state = state.message("loses " + str(reward.plustwos) + " plustwo tokens")
         elif reward.plustwos > 0:
@@ -695,6 +789,13 @@ class PlayerState():
             message += ", bonus dice: " + ", ".join([str(die) for die in roll.bonus_dice])
         state = state.message(message)
         return state
+
+    def useKingsEnvoy(self):
+        if not self.has_kings_envoy:
+            raise Exception("Cannot use King's Envoy")
+        state = self.copy()
+        state.has_kings_envoy = False
+        return state.message("loses King's Envoy")
 
     # TODO rename to double underscore
     def choices_advisorInfluence(self, available: List[AdvisorScore]) -> List[AdvisorInfluence]:
@@ -751,3 +852,24 @@ class PlayerState():
             possible_influences.append(influence)
 
         return possible_influences
+
+    def choices__buildings(self) -> List[Building]:
+        """
+        Returns the list of buildings this player can buy.
+        """
+        buildings: List[Building] = []
+        for row in PROVINCE_SHEET:
+            for building in row:
+                if building in self.buildings:
+                    continue
+                after_buying = self.addResources(BUILDING_COST[building])
+                if after_buying.resources[RESOURCE_GOLD] < 0:
+                    break
+                if after_buying.resources[RESOURCE_WOOD] < 0:
+                    break
+                if after_buying.resources[RESOURCE_STONE] < 0:
+                    break
+                buildings.append(building)
+                break
+        buildings.append(BUILD_PASS)
+        return buildings

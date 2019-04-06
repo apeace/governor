@@ -46,6 +46,12 @@ class Engine():
     def chooseReward(self, state: kingsburg.State, name: str, advisorScore: kingsburg.AdvisorScore, possible_rewards: List[kingsburg.Reward]) -> kingsburg.Reward:
         raise NotImplementedError
 
+    def chooseBuilding(self, state: kingsburg.State, name: str, use_kings_envoy: bool) -> kingsburg.Building:
+        raise NotImplementedError
+
+    def choices__buildings(self, state: kingsburg.State, name: str) -> List[kingsburg.Building]:
+        return state.choices__buildings(name)
+
 class PlayerEngine(Engine):
     """
     Calls on Player objects to make decisions.
@@ -66,6 +72,9 @@ class PlayerEngine(Engine):
 
     def chooseReward(self, state: kingsburg.State, name: str, advisorScore: kingsburg.AdvisorScore, possible_rewards: List[kingsburg.Reward]) -> kingsburg.Reward:
         return self.players[name].chooseReward(state, advisorScore, possible_rewards)
+
+    def chooseBuilding(self, state: kingsburg.State, name: str, use_kings_envoy: bool) -> kingsburg.Building:
+        return self.players[name].chooseBuilding(state, self.choices__buildings(state, name), use_kings_envoy)
 
 class CliEngine(PlayerEngine):
     """
@@ -123,3 +132,6 @@ class RandomCliEngine(CliEngine, RandomEngine):
 
     def chooseReward(self, state: kingsburg.State, name: str, advisorScore: kingsburg.AdvisorScore, possible_rewards: List[kingsburg.Reward]) -> kingsburg.Reward:
         return RandomEngine.chooseReward(self, state, name, advisorScore, possible_rewards)
+
+    def chooseBuilding(self, state: kingsburg.State, name: str, use_kings_envoy: bool) -> kingsburg.Building:
+        return RandomEngine.chooseBuilding(self, state, name, use_kings_envoy)

@@ -117,7 +117,7 @@ def test_kings_favor__fewest_buildings():
     state = kingsburg \
         .State() \
         .setPlayers(["fred", "george"]) \
-        .giveBuilding("fred", kingsburg.BUILDING_STATUE)
+        .giveBuilding("fred", kingsburg.BUILDING_STATUE, False)
     assert not state.players["fred"].has_kings_favor_bonus_die
     assert not state.players["george"].has_kings_favor_bonus_die
 
@@ -184,13 +184,24 @@ def test_add_resources():
     assert player.resources[kingsburg.RESOURCE_STONE] == 3
 
 def test_add_building():
-    player = kingsburg.PlayerState("fred").addBuilding(kingsburg.BUILDING_STATUE)
-    assert len(player.buildings) == 1
+    player = kingsburg.PlayerState("fred")\
+        .addResources({kingsburg.RESOURCE_GOLD: 2, kingsburg.RESOURCE_WOOD: 1})\
+        .addBuilding(kingsburg.BUILDING_STATUE, [])
+    assert player.buildings == [kingsburg.BUILDING_STATUE]
+    assert player.resources == {kingsburg.RESOURCE_GOLD: 0, kingsburg.RESOURCE_WOOD: 1, kingsburg.RESOURCE_STONE: 0}
+    assert player.victory_points == 3
 
-    player = player.addBuilding(kingsburg.BUILDING_CHAPEL)
-    assert len(player.buildings) == 2
-    assert player.buildings[0] == kingsburg.BUILDING_STATUE
-    assert player.buildings[1] == kingsburg.BUILDING_CHAPEL
+    player = player\
+        .addResources({kingsburg.RESOURCE_GOLD: 3, kingsburg.RESOURCE_STONE: 1})\
+        .addBuilding(kingsburg.BUILDING_CHAPEL, [])
+    assert player.buildings == [kingsburg.BUILDING_STATUE, kingsburg.BUILDING_CHAPEL]
+    assert player.resources == {kingsburg.RESOURCE_GOLD: 0, kingsburg.RESOURCE_WOOD: 1, kingsburg.RESOURCE_STONE: 0}
+    assert player.victory_points == 8
+
+def test_add_building__stable():
+    player = kingsburg.PlayerState("fred") \
+        .addBuilding(kingsburg.BUILDING_STABLE, [kingsburg.ADVISOR_GENERAL])
+    assert player.soldiers == 1
 
 def test_add_bonus_die():
     player = kingsburg.PlayerState("fred").addKingsFavorBonusDie()
@@ -211,7 +222,7 @@ def test_get_num_bonus_dice():
     player = kingsburg.PlayerState("fred").addKingsFavorBonusDie()
     assert player.getNumBonusDice(kingsburg.PHASE_SPRING) == 1
 
-    player = kingsburg.PlayerState("fred").addKingsFavorBonusDie().addBuilding(kingsburg.BUILDING_FARMS)
+    player = kingsburg.PlayerState("fred").addKingsFavorBonusDie().addBuilding(kingsburg.BUILDING_FARMS, [])
     assert player.getNumBonusDice(kingsburg.PHASE_SPRING) == 2
 
 def test_roll():
@@ -450,7 +461,7 @@ def test_choices_advisor_influence__withbonus_withplustwo_withmarket():
     player = kingsburg.PlayerState("fred").roll(kingsburg.ProductiveSeasonRoll(
         player_dice=[1, 1, 1],
         bonus_dice=[1],
-    )).addBuilding(kingsburg.BUILDING_MARKET)
+    )).addBuilding(kingsburg.BUILDING_MARKET, [])
     player.plustwo_tokens = 1
     expected: List[kingsburg.AdvisorInfluence] = [
         kingsburg.ADVISOR_INFLUENCE_PASS,
@@ -668,7 +679,7 @@ def test_choices_advisor_influence__withbonus_withplustwo_withmarket_excluded():
     player = kingsburg.PlayerState("fred").roll(kingsburg.ProductiveSeasonRoll(
         player_dice=[1, 1, 1],
         bonus_dice=[1],
-    )).addBuilding(kingsburg.BUILDING_MARKET)
+    )).addBuilding(kingsburg.BUILDING_MARKET, [])
     player.plustwo_tokens = 1
     expected: List[kingsburg.AdvisorInfluence] = [
         kingsburg.ADVISOR_INFLUENCE_PASS,
@@ -748,7 +759,7 @@ def test_choices_advisor_influence__withbonus_withplustwo_withmarket_excluded_wi
     player = kingsburg.PlayerState("fred").roll(kingsburg.ProductiveSeasonRoll(
         player_dice=[1, 1, 1],
         bonus_dice=[1],
-    )).addBuilding(kingsburg.BUILDING_MARKET)
+    )).addBuilding(kingsburg.BUILDING_MARKET, [])
     player.plustwo_tokens = 1
     player.has_kings_envoy = True
     expected: List[kingsburg.AdvisorInfluence] = [
@@ -969,7 +980,7 @@ def test_spenddice():
             player_dice=[1, 2, 3],
             bonus_dice=[4],
         ))\
-        .addBuilding(kingsburg.BUILDING_MARKET)
+        .addBuilding(kingsburg.BUILDING_MARKET, [])
     player.plustwo_tokens = 1
 
     influence = kingsburg.AdvisorInfluence(
@@ -1016,3 +1027,40 @@ def test_applyreward():
     }
     assert player.soldiers == 1
     assert player.plustwo_tokens == 1
+
+def test_choices_buildings__rich():
+    player = kingsburg.PlayerState("fred")\
+        .addResources({kingsburg.RESOURCE_GOLD: 100, kingsburg.RESOURCE_WOOD: 100, kingsburg.RESOURCE_STONE: 100})\
+        .addBuilding(kingsburg.BUILDING_BARRICADE, [])\
+        .addBuilding(kingsburg.BUILDING_CRANE, [])
+    choices = player.choices__buildings()
+
+    expected = [
+        kingsburg.BUILDING_STATUE,
+        kingsburg.BUILDING_INN,
+        kingsburg.BUILDING_GUARD_TOWER,
+        kingsburg.BUILDING_PALISADE,
+        kingsburg.BUILDING_TOWN_HALL,
+        kingsburg.BUILD_PASS,
+    ]
+    assert choices == expected
+
+def test_choices_buildings__broke():
+    player = kingsburg.PlayerState("fred")
+    choices = player.choices__buildings()
+
+    assert choices == [kingsburg.BUILD_PASS]
+
+def test_choices_buildings__limited():
+    player = kingsburg.PlayerState("fred") \
+        .addResources({kingsburg.RESOURCE_GOLD: 1, kingsburg.RESOURCE_WOOD: 4, kingsburg.RESOURCE_STONE: 1}) \
+        .addBuilding(kingsburg.BUILDING_BARRICADE, []) \
+        .addBuilding(kingsburg.BUILDING_CRANE, [])
+    choices = player.choices__buildings()
+
+    expected = [
+        kingsburg.BUILDING_INN,
+        kingsburg.BUILDING_PALISADE,
+        kingsburg.BUILD_PASS,
+    ]
+    assert choices == expected

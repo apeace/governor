@@ -23,6 +23,9 @@ class Player():
     def chooseReward(self, state: kingsburg.State, advisorScore: kingsburg.AdvisorScore, possible_rewards: List[kingsburg.Reward]) -> kingsburg.Reward:
         raise NotImplementedError
 
+    def chooseBuilding(self, state: kingsburg.State, choices: List[kingsburg.Building], use_kings_envoy: bool) -> kingsburg.Building:
+        raise NotImplementedError
+
 class CliPlayer(Player):
     """
     A player which asks for choices via CLI.
@@ -59,6 +62,10 @@ class CliPlayer(Player):
         # TODO
         raise NotImplementedError
 
+    def chooseBuilding(self, state: kingsburg.State, choices: List[kingsburg.Building], use_kings_envoy: bool) -> kingsburg.Building:
+        # TODO
+        raise NotImplementedError
+
 class RandomPlayer(Player):
     """
     A player which makes completely random choices.
@@ -85,3 +92,6 @@ class RandomPlayer(Player):
 
     def chooseReward(self, state: kingsburg.State, advisorScore: kingsburg.AdvisorScore, possible_rewards: List[kingsburg.Reward]) -> kingsburg.Reward:
         return random.choice(possible_rewards)
+
+    def chooseBuilding(self, state: kingsburg.State, choices: List[kingsburg.Building], use_kings_envoy: bool) -> kingsburg.Building:
+        return random.choice(choices)

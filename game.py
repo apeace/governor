@@ -3,6 +3,9 @@ from typing import Dict, Set
 import engine
 import kingsburg
 
+# TODO right now a player can influence the same advisor twice with King's Envoy
+# available_advisors stuff should take that into account
+
 class Game():
     """
     Plays through a game, using inputs from an Engine.
@@ -95,6 +98,7 @@ class Game():
                 influence = self.engine.influenceAdvisor(self.state, name)
                 if influence == kingsburg.ADVISOR_INFLUENCE_PASS:
                     passes.add(name)
+                # TODO rename to chooseAdvisor
                 self.state = self.state.influenceAdvisor(name, influence)
             self.engine.log(self.state, self.state.clearMessages())
 
@@ -102,6 +106,9 @@ class Game():
         for advisorScore in kingsburg.ADVISORS:
             if advisorScore in self.state.taken_advisors:
                 for name in self.state.taken_advisors[advisorScore]:
+                    # TODO refactor possible_rewards into engine/player
+                    # In fact make engine list the possible stuff for every move
+                    # That way it can be fed into both CliPlayer and RandomPlayer
                     possible_rewards = kingsburg.ADVISOR[advisorScore].choices__rewards(self.state.players[name].resources)
                     if len(possible_rewards) == 1:
                         reward = possible_rewards[0]
@@ -112,8 +119,16 @@ class Game():
                     self.state = self.state.giveReward(name, advisorScore, reward)
         self.engine.log(self.state, self.state.clearMessages())
 
-        # TODO construct buildings
-        # TODO king's envoy allows to build an additional building
+        # In turn order, players construct buildings.
+        for name in self.state.turn_order:
+            building = self.engine.chooseBuilding(self.state, name, use_kings_envoy=False)
+            self.state = self.state.giveBuilding(name, building, use_kings_envoy=False)
+            if building != kingsburg.BUILD_PASS and self.state.players[name].has_kings_envoy:
+                building = self.engine.chooseBuilding(self.state, name, use_kings_envoy=True)
+                self.state = self.state.giveBuilding(name, building, use_kings_envoy=True)
+        self.engine.log(self.state, self.state.clearMessages())
+
+        # TODO clear advisor influences
 
         self.engine.log(self.state, "Productive season done")
 
