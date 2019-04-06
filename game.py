@@ -6,6 +6,8 @@ import kingsburg
 # TODO right now a player can influence the same advisor twice with King's Envoy
 # available_advisors stuff should take that into account
 
+# TODO king's envoy should be taken away if influencing an advisor with it
+
 class Game():
     """
     Plays through a game, using inputs from an Engine.
