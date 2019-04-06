@@ -77,6 +77,19 @@ def test_unique_combinations__allones():
     got = util.unique_combinations(roll)
     assert got == expected
 
+def test_unique_list_pairs__withduplicate():
+    player_roll = [1, 1, 1]
+    bonus_roll = [1]
+    expected = [
+        [1, 1]
+    ]
+    got = util.unique_list_pairs(
+        player_roll,
+        bonus_roll,
+    )
+
+    assert got == expected
+
 def test_unique_list_pairs__onebonus():
     player_roll = [1, 2, 3]
     bonus_roll = [4]
