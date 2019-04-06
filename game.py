@@ -150,4 +150,3 @@ class Game():
         # TODO Embassy grants VP
 
         self.state = self.state.phaseComplete(phase)
-

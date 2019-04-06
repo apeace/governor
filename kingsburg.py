@@ -368,6 +368,12 @@ class State():
         self.turn_order: List[str] = []
         self.taken_advisors: Dict[AdvisorScore, List[str]] = {}
 
+    def toDict(self):
+        d = self.__dict__
+        del d["messages"]
+        d["players"] = [p.toDict() for p in self.playerList()]
+        return d
+
     def copy(self) -> State:
         return copy.deepcopy(self)
 
@@ -663,6 +669,11 @@ class PlayerState():
         self.dice: ProductiveSeasonRoll = ProductiveSeasonRoll([], [])
         self.victory_points = 0
         self.soldiers = 0
+
+    def toDict(self):
+        d = self.__dict__
+        d['dice'] = self.dice.__dict__
+        return d
 
     def copy(self) -> PlayerState:
         return copy.deepcopy(self)
