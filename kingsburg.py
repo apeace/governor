@@ -517,12 +517,17 @@ class State():
         """
         return RESOURCES
 
-    def choices_advisorInfluenceReward(self, name: str) -> List[AdvisorInfluence]:
+    # TODO rename to double underscore
+    def choices_advisorInfluence(self, name: str) -> List[AdvisorInfluence]:
+        """
+        Returns the list of available advisor influences for the given player.
+        Rewards are not included, this only represents possible dice placements.
+        """
         available: List[AdvisorScore] = []
         for advisor in ADVISORS:
             if advisor not in self.taken_advisors:
                 available.append(advisor)
-        return self.players[name].choices__advisorInfluenceReward(available)
+        return self.players[name].choices_advisorInfluence(available)
 
 ##############################################
 # Player state
@@ -600,12 +605,11 @@ class PlayerState():
         return state
 
     def influenceAdvisor(self, influence: AdvisorInfluence) -> PlayerState:
+        # TODO test
         state = self.copy()
         score = influence.advisorScore()
         state = state.message("influences " + ADVISOR[score].name + " (" + str(score) + ")")
         state = state.spendDice(influence)
-        if influence.reward is not None:
-            state = state.applyReward(influence.reward)
         return state
 
     def spendDice(self, influence: AdvisorInfluence) -> PlayerState:
@@ -684,6 +688,7 @@ class PlayerState():
         state = state.message(message)
         return state
 
+    # TODO rename to double underscore
     def choices_advisorInfluence(self, available: List[AdvisorScore]) -> List[AdvisorInfluence]:
         """
         Returns the possible advisor influences this player could make.

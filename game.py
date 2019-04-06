@@ -9,6 +9,8 @@ class Game():
     """
 
     def __init__(self, engine: engine.Engine, state: kingsburg.State):
+        # TODO it appears to be impossible to specify the type of self.engine
+        # TODO also, self.state does not appear to be type-checked
         self.engine = engine
         self.state: kingsburg.State = state
 
@@ -85,17 +87,20 @@ class Game():
         # TODO Statue & Chapel allow re-rolls
 
         # Players take turns influencing advisors until each player passes
-        # TODO rewards need to be taken AFTER influencing is done
         passes: Set[str] = set()
         while len(passes) < len(self.state.turn_order):
             for name in self.state.turn_order:
                 if name in passes:
                     continue
+                # TODO only advisor
                 influence = self.engine.influenceAdvisor(self.state, name)
                 if influence == kingsburg.ADVISOR_INFLUENCE_PASS:
                     passes.add(name)
+                # TODO only advisor
                 self.state = self.state.influenceAdvisor(name, influence)
             self.engine.log(self.state, self.state.clearMessages())
+
+        # TODO receive rewards
 
         self.engine.log(self.state, "Productive season done")
 

@@ -55,6 +55,7 @@ class CliPlayer(Player):
 class RandomPlayer(Player):
     """
     A player which makes completely random choices.
+    Dice rolls are randomly generated.
     """
 
     def pickFreeResource(self, state):
@@ -73,4 +74,4 @@ class RandomPlayer(Player):
         )
 
     def influenceAdvisor(self, state: kingsburg.State) -> kingsburg.AdvisorInfluence:
-        return random.choice(state.choices_advisorInfluenceReward(self.name))
+        return random.choice(state.choices_advisorInfluence(self.name))
