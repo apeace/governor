@@ -609,7 +609,6 @@ class PlayerState():
         return state
 
     def spendDice(self, influence: AdvisorInfluence) -> PlayerState:
-        # TODO test
         state = self.copy()
         state = state.message("spends player dice: " + str(influence.player_dice))
         state.dice.player_dice = util.list_minus(state.dice.player_dice, influence.player_dice)

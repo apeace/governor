@@ -962,3 +962,24 @@ def test_choices_advisor_influence__withbonus_withplustwo_withmarket_excluded_wi
     got = player.choices_advisorInfluence([kingsburg.ADVISOR_JESTER, kingsburg.ADVISOR_ARCHITECT])
 
     assert got == expected
+
+def test_spenddice():
+    player = kingsburg.PlayerState("fred")\
+        .roll(kingsburg.ProductiveSeasonRoll(
+            player_dice=[1, 2, 3],
+            bonus_dice=[4],
+        ))\
+        .addBuilding(kingsburg.BUILDING_MARKET)
+    player.plustwo_tokens = 1
+
+    influence = kingsburg.AdvisorInfluence(
+        player_dice=[1],
+        bonus_dice=[4],
+        plus_two=True,
+        market_modifier=-1
+    )
+    player = player.spendDice(influence)
+
+    assert player.dice.player_dice == [2, 3]
+    assert player.dice.bonus_dice == []
+    assert player.plustwo_tokens == 0
