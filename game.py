@@ -26,6 +26,7 @@ class Game():
     def setup(self):
         """
         Setup game state for the start of the game.
+        Initial turn order is assumed to be the order the players were entered.
         """
         self.state = self.state.setPlayers(self.engine.getPlayers())
         self.engine.start(self.state)
@@ -74,7 +75,7 @@ class Game():
         # TODO Merchant's guild rewards gold
         # TODO 2-player rule: block advisors
 
-        # Each player rolls dice.
+        # Each player rolls dice and turn order is set.
         rolls: Dict[str, kingsburg.ProductiveSeasonRoll] = {}
         for name in self.state.players:
             rolls[name] = self.engine.rollDice(self.state, name)
