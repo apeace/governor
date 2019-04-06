@@ -17,7 +17,7 @@ class Player():
     def rollDice(self, state: kingsburg.State) -> kingsburg.ProductiveSeasonRoll:
         raise NotImplementedError
 
-    def influenceAdvisor(self, state: kingsburg.State) -> kingsburg.AdvisorInfluence:
+    def chooseAdvisor(self, state: kingsburg.State) -> kingsburg.AdvisorInfluence:
         raise NotImplementedError
 
     def chooseReward(self, state: kingsburg.State, advisorScore: kingsburg.AdvisorScore, possible_rewards: List[kingsburg.Reward]) -> kingsburg.Reward:
@@ -54,7 +54,7 @@ class CliPlayer(Player):
             bonus_dice=[int(die) for die in bdice]
         )
 
-    def influenceAdvisor(self, state: kingsburg.State) -> kingsburg.AdvisorInfluence:
+    def chooseAdvisor(self, state: kingsburg.State) -> kingsburg.AdvisorInfluence:
         # TODO
         return kingsburg.ADVISOR_INFLUENCE_PASS
 
@@ -87,7 +87,7 @@ class RandomPlayer(Player):
             bonus_dice=bdice
         )
 
-    def influenceAdvisor(self, state: kingsburg.State) -> kingsburg.AdvisorInfluence:
+    def chooseAdvisor(self, state: kingsburg.State) -> kingsburg.AdvisorInfluence:
         return random.choice(state.choices_advisorInfluence(self.name))
 
     def chooseReward(self, state: kingsburg.State, advisorScore: kingsburg.AdvisorScore, possible_rewards: List[kingsburg.Reward]) -> kingsburg.Reward:

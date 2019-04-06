@@ -30,8 +30,7 @@ class Engine():
         """
         self.logger.log(state, message=message)
 
-    # TODO rename setupPlayers
-    def getPlayers(self) -> List[str]:
+    def setupPlayers(self) -> List[str]:
         raise NotImplementedError
 
     def pickFreeResource(self, state: kingsburg.State, name: str) -> str:
@@ -40,7 +39,7 @@ class Engine():
     def rollDice(self, state: kingsburg.State, name: str) -> kingsburg.ProductiveSeasonRoll:
         raise NotImplementedError
 
-    def influenceAdvisor(self, state: kingsburg.State, name: str) -> kingsburg.AdvisorInfluence:
+    def chooseAdvisor(self, state: kingsburg.State, name: str) -> kingsburg.AdvisorInfluence:
         raise NotImplementedError
 
     def chooseReward(self, state: kingsburg.State, name: str, advisorScore: kingsburg.AdvisorScore, possible_rewards: List[kingsburg.Reward]) -> kingsburg.Reward:
@@ -67,8 +66,8 @@ class PlayerEngine(Engine):
     def rollDice(self, state: kingsburg.State, name: str) -> kingsburg.ProductiveSeasonRoll:
         return self.players[name].rollDice(state)
 
-    def influenceAdvisor(self, state: kingsburg.State, name: str) -> kingsburg.AdvisorInfluence:
-        return self.players[name].influenceAdvisor(state)
+    def chooseAdvisor(self, state: kingsburg.State, name: str) -> kingsburg.AdvisorInfluence:
+        return self.players[name].chooseAdvisor(state)
 
     def chooseReward(self, state: kingsburg.State, name: str, advisorScore: kingsburg.AdvisorScore, possible_rewards: List[kingsburg.Reward]) -> kingsburg.Reward:
         return self.players[name].chooseReward(state, advisorScore, possible_rewards)
@@ -92,7 +91,7 @@ class CliEngine(PlayerEngine):
         super().log(state, message=message)
         self.wait()
 
-    def getPlayers(self):
+    def setupPlayers(self):
         names = []
         while True:
             name = input("Enter player: ")
@@ -106,7 +105,7 @@ class RandomEngine(PlayerEngine):
     Play the game with automated random players.
     """
 
-    def getPlayers(self):
+    def setupPlayers(self):
         names = ["fred", "george", "ron"]
         for name in names:
             self.players[name] = player.RandomPlayer(name)
@@ -127,8 +126,8 @@ class RandomCliEngine(CliEngine, RandomEngine):
     def log(self, state, message=None):
         return CliEngine.log(self, state, message=message)
 
-    def getPlayers(self):
-        return RandomEngine.getPlayers(self)
+    def setupPlayers(self):
+        return RandomEngine.setupPlayers(self)
 
     def chooseReward(self, state: kingsburg.State, name: str, advisorScore: kingsburg.AdvisorScore, possible_rewards: List[kingsburg.Reward]) -> kingsburg.Reward:
         return RandomEngine.chooseReward(self, state, name, advisorScore, possible_rewards)

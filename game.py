@@ -35,7 +35,7 @@ class Game():
         Setup game state for the start of the game.
         Initial turn order is assumed to be the order the players were entered.
         """
-        self.state = self.state.setPlayers(self.engine.getPlayers())
+        self.state = self.state.setPlayers(self.engine.setupPlayers())
         self.engine.start(self.state)
 
     def tick(self) -> bool:
@@ -109,10 +109,9 @@ class Game():
             for name in self.state.turn_order:
                 if name in passes:
                     continue
-                influence = self.engine.influenceAdvisor(self.state, name)
+                influence = self.engine.chooseAdvisor(self.state, name)
                 if influence == kingsburg.ADVISOR_INFLUENCE_PASS:
                     passes.add(name)
-                # TODO rename to chooseAdvisor
                 self.state = self.state.influenceAdvisor(name, influence)
             self.engine.log(self.state, self.state.clearMessages())
 
