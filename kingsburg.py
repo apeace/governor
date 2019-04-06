@@ -513,6 +513,7 @@ class State():
     def giveReward(self, name: str, advisor_score: AdvisorScore, reward: Reward) -> State:
         # TODO test
         state = self.copy()
+        state = state.message(name + " takes reward from " + ADVISOR[advisor_score].name + " (" + str(advisor_score) + ")")
         state = state.updatePlayer(name, state.players[name].applyReward(reward))
         state.taken_advisors[advisor_score] = [n for n in state.taken_advisors[advisor_score] if n != name]
         return state
