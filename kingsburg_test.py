@@ -291,7 +291,7 @@ def test_choices_advisor_influence__simple():
             bonus_dice=[],
         ),
     ]
-    assert player.choices_advisorInfluence(kingsburg.ADVISORS) == expected
+    assert player.choices__advisorInfluence(kingsburg.ADVISORS) == expected
 
 def test_choices_advisor_influence__simple_with_taken():
     player = kingsburg.PlayerState("fred").roll(kingsburg.ProductiveSeasonRoll(
@@ -305,7 +305,7 @@ def test_choices_advisor_influence__simple_with_taken():
             bonus_dice=[],
         ),
     ]
-    assert player.choices_advisorInfluence([kingsburg.ADVISOR_JESTER]) == expected
+    assert player.choices__advisorInfluence([kingsburg.ADVISOR_JESTER]) == expected
 
 def test_choices_advisor_influence__simple2():
     player = kingsburg.PlayerState("fred").roll(kingsburg.ProductiveSeasonRoll(
@@ -343,7 +343,7 @@ def test_choices_advisor_influence__simple2():
             bonus_dice=[],
         ),
     ]
-    assert player.choices_advisorInfluence(kingsburg.ADVISORS) == expected
+    assert player.choices__advisorInfluence(kingsburg.ADVISORS) == expected
 
 def test_choices_advisor_influence__simple2_with_taken():
     player = kingsburg.PlayerState("fred").roll(kingsburg.ProductiveSeasonRoll(
@@ -365,7 +365,7 @@ def test_choices_advisor_influence__simple2_with_taken():
             bonus_dice=[],
         ),
     ]
-    assert player.choices_advisorInfluence([kingsburg.ADVISOR_JESTER, kingsburg.ADVISOR_ARCHITECT]) == expected
+    assert player.choices__advisorInfluence([kingsburg.ADVISOR_JESTER, kingsburg.ADVISOR_ARCHITECT]) == expected
 
 def test_choices_advisor_influence__withbonus():
     player = kingsburg.PlayerState("fred").roll(kingsburg.ProductiveSeasonRoll(
@@ -399,7 +399,7 @@ def test_choices_advisor_influence__withbonus():
             bonus_dice=[1],
         ),
     ]
-    assert player.choices_advisorInfluence(kingsburg.ADVISORS) == expected
+    assert player.choices__advisorInfluence(kingsburg.ADVISORS) == expected
     
 def test_choices_advisor_influence__insanebonus():
     player = kingsburg.PlayerState("fred").roll(kingsburg.ProductiveSeasonRoll(
@@ -429,7 +429,7 @@ def test_choices_advisor_influence__insanebonus():
             bonus_dice=[],
         ),
     ]
-    assert player.choices_advisorInfluence(kingsburg.ADVISORS) == expected
+    assert player.choices__advisorInfluence(kingsburg.ADVISORS) == expected
 
 def test_choices_advisor_influence__withbonus_withplustwo():
     player = kingsburg.PlayerState("fred").roll(kingsburg.ProductiveSeasonRoll(
@@ -494,7 +494,7 @@ def test_choices_advisor_influence__withbonus_withplustwo():
             plus_two=True
         ),
     ]
-    assert player.choices_advisorInfluence(kingsburg.ADVISORS) == expected
+    assert player.choices__advisorInfluence(kingsburg.ADVISORS) == expected
 
 def test_choices_advisor_influence__withbonus_withplustwo_withmarket():
     player = kingsburg.PlayerState("fred").roll(kingsburg.ProductiveSeasonRoll(
@@ -710,7 +710,7 @@ def test_choices_advisor_influence__withbonus_withplustwo_withmarket():
         ),
     ]
 
-    got = player.choices_advisorInfluence(kingsburg.ADVISORS)
+    got = player.choices__advisorInfluence(kingsburg.ADVISORS)
 
     assert got == expected
 
@@ -790,7 +790,7 @@ def test_choices_advisor_influence__withbonus_withplustwo_withmarket_excluded():
         ),
     ]
 
-    got = player.choices_advisorInfluence([kingsburg.ADVISOR_JESTER, kingsburg.ADVISOR_ARCHITECT])
+    got = player.choices__advisorInfluence([kingsburg.ADVISOR_JESTER, kingsburg.ADVISOR_ARCHITECT])
 
     assert got == expected
 
@@ -1009,7 +1009,7 @@ def test_choices_advisor_influence__withbonus_withplustwo_withmarket_excluded_wi
         ),
     ]
 
-    got = player.choices_advisorInfluence([kingsburg.ADVISOR_JESTER, kingsburg.ADVISOR_ARCHITECT])
+    got = player.choices__advisorInfluence([kingsburg.ADVISOR_JESTER, kingsburg.ADVISOR_ARCHITECT])
 
     assert got == expected
 

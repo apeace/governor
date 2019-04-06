@@ -624,8 +624,7 @@ class State():
         """
         return RESOURCES
 
-    # TODO rename to double underscore
-    def choices_advisorInfluence(self, name: str) -> List[AdvisorInfluence]:
+    def choices__advisorInfluence(self, name: str) -> List[AdvisorInfluence]:
         """
         Returns the list of available advisor influences for the given player.
         Rewards are not included, this only represents possible dice placements.
@@ -634,7 +633,7 @@ class State():
         for advisor in ADVISORS:
             if advisor not in self.taken_advisors:
                 available.append(advisor)
-        return self.players[name].choices_advisorInfluence(available)
+        return self.players[name].choices__advisorInfluence(available)
 
     def choices__buildings(self, name: str) -> List[Building]:
         """
@@ -848,8 +847,7 @@ class PlayerState():
         state.has_kings_envoy = False
         return state.message("loses King's Envoy")
 
-    # TODO rename to double underscore
-    def choices_advisorInfluence(self, available: List[AdvisorScore]) -> List[AdvisorInfluence]:
+    def choices__advisorInfluence(self, available: List[AdvisorScore]) -> List[AdvisorInfluence]:
         """
         Returns the possible advisor influences this player could make.
         Does not compute all possible rewards.

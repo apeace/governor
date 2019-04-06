@@ -88,7 +88,7 @@ class RandomPlayer(Player):
         )
 
     def chooseAdvisor(self, state: kingsburg.State) -> kingsburg.AdvisorInfluence:
-        return random.choice(state.choices_advisorInfluence(self.name))
+        return random.choice(state.choices__advisorInfluence(self.name))
 
     def chooseReward(self, state: kingsburg.State, advisorScore: kingsburg.AdvisorScore, possible_rewards: List[kingsburg.Reward]) -> kingsburg.Reward:
         return random.choice(possible_rewards)
