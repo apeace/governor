@@ -89,7 +89,7 @@ def unique_list_pairs(lists1, lists2):
 def tuplize(list):
     out = []
     for item in list:
-        if not isinstance(item, collections.Iterable):
+        if not isinstance(item, collections.abc.Iterable):
             out.append(item)
         else:
             out.append(tuplize(item))
