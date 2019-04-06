@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, Set
 
 import engine
 import kingsburg
@@ -88,14 +88,16 @@ class Game():
 
         # TODO Statue & Chapel allow re-rolls
 
-        # Players take turns influencing advisors
-        num_passes = 0
-        while num_passes < len(self.state.turn_order):
-            num_passes = 0
+        # Players take turns influencing advisors until each player passes
+        # TODO rewards need to be taken AFTER influencing is done
+        passes: Set[str] = set()
+        while len(passes) < len(self.state.turn_order):
             for name in self.state.turn_order:
+                if name in passes:
+                    continue
                 influence = self.engine.influenceAdvisor(self.state, name)
                 if influence == kingsburg.ADVISOR_INFLUENCE_PASS:
-                    num_passes += 1
+                    passes.add(name)
                 self.state = self.state.influenceAdvisor(name, influence)
             self.engine.log(self.state, self.state.messages)
             self.state.clearMessages()
