@@ -8,6 +8,8 @@ import kingsburg
 
 # TODO king's envoy should be taken away if influencing an advisor with it
 
+# It is currently able to spend two plustwos in a row
+
 class Game():
     """
     Plays through a game, using inputs from an Engine.

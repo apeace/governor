@@ -373,8 +373,12 @@ def test_list_minus():
 def test_pick_best():
     input = [(10, "fred"), (5, "george"), (3, "ron")]
     got = util.pick_best(input)
-    assert got == "fred"
+    assert got == (10, "fred")
 
     input = [(1, "fred"), (5, "george"), (3, "ron")]
     got = util.pick_best(input)
-    assert got == "george"
+    assert got == (5, "george")
+
+    input = [(-1, "fred"), (-5, "george"), (-3, "ron")]
+    got = util.pick_best(input)
+    assert got == (-1, "fred")

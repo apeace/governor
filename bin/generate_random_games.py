@@ -26,6 +26,8 @@ def ident():
     rand = random.randint(10000, 99990)
     return str(unix) + "-" + str(rand)
 
+# TODO should start games at a random state rather than beginning
+
 if __name__ == "__main__":
     if len(sys.argv) != 4:
         print("Usage:")

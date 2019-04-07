@@ -117,10 +117,10 @@ def list_minus(list1: List[int], list2: List[int]):
     return new_list1
 
 def pick_best(input):
-    max_val = 0
+    max_val = float("-inf")
     max_in = None
     for x in input:
-        if x[0] > max_val:
+        if x[0] >= max_val:
             max_val = x[0]
-            max_in = x[1]
+            max_in = x
     return max_in

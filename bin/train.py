@@ -41,11 +41,14 @@ if __name__ == "__main__":
                     input = training.state_to_input(s)
                     assert len(input) == 167
                     states.append(input)
-                    wins.append(d["won"])
+                    wins.append(s.players["fred"].victory_points)
+                    # wins.append(d["won"])
                 count += 1
 
     model = keras.models.Sequential()
-    model.add(keras.layers.Dense(200, input_dim=167, activation="relu"))
+    model.add(keras.layers.Dense(1000, input_dim=167, activation="relu"))
+    model.add(keras.layers.Dense(1000, activation='relu'))
+    model.add(keras.layers.Dense(1000, activation='relu'))
     model.add(keras.layers.Dense(1, activation="linear", kernel_initializer="glorot_uniform"))
     model.compile(loss="mean_squared_error", optimizer="adam", metrics=["accuracy"])
     model.fit(numpy.asarray(states), numpy.asarray(wins), verbose=False)

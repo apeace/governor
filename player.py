@@ -93,7 +93,15 @@ class RandomPlayer(Player):
         )
 
     def chooseAdvisor(self, state: kingsburg.State) -> kingsburg.AdvisorInfluence:
-        return random.choice(state.choices__advisorInfluence(self.name))
+        # Give a bias towards not passing.
+        # Pass will happen 5% of the time, unless it is the only option.
+        choices = state.choices__advisorInfluence(self.name)
+        if len(choices) == 1:
+            return choices[0]
+        if random.randint(0, 100) > 95:
+            return kingsburg.ADVISOR_INFLUENCE_PASS
+        choices = [c for c in choices if c != kingsburg.ADVISOR_INFLUENCE_PASS]
+        return random.choice(choices)
 
     def chooseReward(self, state: kingsburg.State, advisorScore: kingsburg.AdvisorScore, possible_rewards: List[kingsburg.Reward]) -> Optional[kingsburg.Reward]:
         if len(possible_rewards) == 0:
@@ -101,6 +109,14 @@ class RandomPlayer(Player):
         return random.choice(possible_rewards)
 
     def chooseBuilding(self, state: kingsburg.State, choices: List[kingsburg.Building], use_kings_envoy: bool) -> kingsburg.Building:
+        # Give a bias towards not passing.
+        # Pass will happen 5% of the time, unless it is the only option.
+        choices = state.choices__buildings(self.name)
+        if len(choices) == 1:
+            return choices[0]
+        if random.randint(0, 100) > 95:
+            return kingsburg.BUILD_PASS
+        choices = [c for c in choices if c != kingsburg.BUILD_PASS]
         return random.choice(choices)
 
 class GovPlayer(RandomPlayer):
@@ -118,9 +134,12 @@ class GovPlayer(RandomPlayer):
         for c in choices:
             new_state = state.takeFreeResource(self.name, c)
             inp = training.state_to_input(new_state)
-            prediction = self.model.predict(numpy.asarray([inp]))[0]
+            prediction = self.model.predict(numpy.asarray([inp]))[0][0]
             scored_choices.append((prediction, c))
-        return util.pick_best(scored_choices)
+        print(str(scored_choices))
+        chosen = util.pick_best(scored_choices)
+        print("Score: " + str(chosen[0]))
+        return chosen[1]
 
     def chooseAdvisor(self, state: kingsburg.State) -> kingsburg.AdvisorInfluence:
         choices = state.choices__advisorInfluence(self.name)
@@ -128,24 +147,33 @@ class GovPlayer(RandomPlayer):
         for c in choices:
             new_state = state.influenceAdvisor(self.name, c)
             inp = training.state_to_input(new_state)
-            prediction = self.model.predict(numpy.asarray([inp]))[0]
+            prediction = self.model.predict(numpy.asarray([inp]))[0][0]
             scored_choices.append((prediction, c))
-        return util.pick_best(scored_choices)
+        print(str(scored_choices))
+        chosen = util.pick_best(scored_choices)
+        print("Score: " + str(chosen[0]))
+        return chosen[1]
 
     def chooseReward(self, state: kingsburg.State, advisorScore: kingsburg.AdvisorScore, possible_rewards: List[kingsburg.Reward]) -> Optional[kingsburg.Reward]:
         scored_choices = []
         for c in possible_rewards:
             new_state = state.giveReward(self.name, advisorScore, c)
             inp = training.state_to_input(new_state)
-            prediction = self.model.predict(numpy.asarray([inp]))[0]
+            prediction = self.model.predict(numpy.asarray([inp]))[0][0]
             scored_choices.append((prediction, c))
-        return util.pick_best(scored_choices)
+        print(str(scored_choices))
+        chosen = util.pick_best(scored_choices)
+        print("Score: " + str(chosen[0]))
+        return chosen[1]
 
     def chooseBuilding(self, state: kingsburg.State, choices: List[kingsburg.Building], use_kings_envoy: bool) -> kingsburg.Building:
         scored_choices = []
         for c in choices:
             new_state = state.giveBuilding(self.name, c, use_kings_envoy)
             inp = training.state_to_input(new_state)
-            prediction = self.model.predict(numpy.asarray([inp]))[0]
+            prediction = self.model.predict(numpy.asarray([inp]))[0][0]
             scored_choices.append((prediction, c))
-        return util.pick_best(scored_choices)
+        print(str(scored_choices))
+        chosen = util.pick_best(scored_choices)
+        print("Score: " + str(chosen[0]))
+        return chosen[1]

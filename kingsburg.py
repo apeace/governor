@@ -270,8 +270,9 @@ ADVISOR = {
     ADVISOR_SWORDSMITH: Advisor("swordsmith", [Reward(resources={RESOURCE_STONE: 1, RESOURCE_WOOD: 1}), Reward(resources={RESOURCE_STONE: 1, RESOURCE_GOLD: 1})]),
     ADVISOR_DUCHESS: Advisor("duchess", [Reward(receive_any_resource=2, plustwos=1)]),
     ADVISOR_CHAMPION: Advisor("champion", [Reward(resources={RESOURCE_STONE: 3})]),
+    # TODO is this really -1 VP?
     ADVISOR_SMUGGLER: Advisor("smuggler", [Reward(victory_points=-1, receive_any_resource=3)]),
-    ADVISOR_INVENTOR: Advisor("inventory", [Reward(resources={RESOURCE_GOLD: 1, RESOURCE_WOOD: 1, RESOURCE_STONE: 1})]),
+    ADVISOR_INVENTOR: Advisor("inventor", [Reward(resources={RESOURCE_GOLD: 1, RESOURCE_WOOD: 1, RESOURCE_STONE: 1})]),
     ADVISOR_WIZARD: Advisor("wizard", [Reward(resources={RESOURCE_GOLD: 4})]),
     ADVISOR_QUEEN: Advisor("queen", [Reward(receive_any_resource=2, view_enemy=True, victory_points=3)]),
     ADVISOR_KING: Advisor("king", [Reward(resources={RESOURCE_GOLD: 1, RESOURCE_WOOD: 1, RESOURCE_STONE: 1}, soldiers=1)]),

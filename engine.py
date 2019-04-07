@@ -81,7 +81,7 @@ class CliEngine(PlayerEngine):
     """
 
     def wait(self):
-        # input("")
+        input("")
         # TODO make pausing an option.
         # Commenting it out for now so I can run an entire game quickly.
         pass
