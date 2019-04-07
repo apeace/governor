@@ -115,3 +115,12 @@ def list_minus(list1: List[int], list2: List[int]):
         new_list1 = new_list1_inprog
         new_list1_inprog = []
     return new_list1
+
+def pick_best(input):
+    max_val = 0
+    max_in = None
+    for x in input:
+        if x[0] > max_val:
+            max_val = x[0]
+            max_in = x[1]
+    return max_in

@@ -81,7 +81,10 @@ class CliEngine(PlayerEngine):
     """
 
     def wait(self):
-        input("")
+        # input("")
+        # TODO make pausing an option.
+        # Commenting it out for now so I can run an entire game quickly.
+        pass
 
     def start(self, state):
         super().start(state)
@@ -95,10 +98,16 @@ class CliEngine(PlayerEngine):
         names = []
         while True:
             name = input("Enter player: ")
+            # Finished with input
             if name == "":
                 return names
             names.append(name)
-            self.players[name] = player.CliPlayer(name)
+            if name.startswith("random_"):
+                self.players[name] = player.RandomPlayer(name)
+            elif name.startswith("gov_"):
+                self.players[name] = player.GovPlayer(name, "models/" + name)
+            else:
+                self.players[name] = player.CliPlayer(name)
 
 class RandomEngine(PlayerEngine):
     """
@@ -151,27 +160,3 @@ class TrainingDataEngine(RandomEngine):
         if len(winners) > 1:
             return 0.8
         return 1
-
-class RandomCliEngine(CliEngine, RandomEngine):
-    """
-    Play the game with automated random players.
-    Press Enter on the CLI to advance the game.
-    """
-
-    def __init__(self, logger):
-        super(RandomEngine, self).__init__(logger)
-
-    def start(self, state):
-        return CliEngine.start(self, state)
-
-    def log(self, state, message=None):
-        return CliEngine.log(self, state, message=message)
-
-    def setupPlayers(self):
-        return RandomEngine.setupPlayers(self)
-
-    def chooseReward(self, state: kingsburg.State, name: str, advisorScore: kingsburg.AdvisorScore, possible_rewards: List[kingsburg.Reward]) -> Optional[kingsburg.Reward]:
-        return RandomEngine.chooseReward(self, state, name, advisorScore, possible_rewards)
-
-    def chooseBuilding(self, state: kingsburg.State, name: str, use_kings_envoy: bool) -> kingsburg.Building:
-        return RandomEngine.chooseBuilding(self, state, name, use_kings_envoy)

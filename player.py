@@ -1,7 +1,12 @@
 import random
 from typing import List, Optional
 
+import keras
+import numpy
+
 import kingsburg
+import training
+import util
 
 class Player():
     """
@@ -97,3 +102,50 @@ class RandomPlayer(Player):
 
     def chooseBuilding(self, state: kingsburg.State, choices: List[kingsburg.Building], use_kings_envoy: bool) -> kingsburg.Building:
         return random.choice(choices)
+
+class GovPlayer(RandomPlayer):
+    """
+    The Governor.
+    """
+
+    def __init__(self, name, filename):
+        Player.__init__(self, name)
+        self.model = keras.models.load_model(filename)
+
+    def pickFreeResource(self, state: kingsburg.State) -> str:
+        choices = state.choices_freeResource(self.name)
+        scored_choices = []
+        for c in choices:
+            new_state = state.takeFreeResource(self.name, c)
+            inp = training.state_to_input(new_state)
+            prediction = self.model.predict(numpy.asarray([inp]))[0]
+            scored_choices.append((prediction, c))
+        return util.pick_best(scored_choices)
+
+    def chooseAdvisor(self, state: kingsburg.State) -> kingsburg.AdvisorInfluence:
+        choices = state.choices__advisorInfluence(self.name)
+        scored_choices = []
+        for c in choices:
+            new_state = state.influenceAdvisor(self.name, c)
+            inp = training.state_to_input(new_state)
+            prediction = self.model.predict(numpy.asarray([inp]))[0]
+            scored_choices.append((prediction, c))
+        return util.pick_best(scored_choices)
+
+    def chooseReward(self, state: kingsburg.State, advisorScore: kingsburg.AdvisorScore, possible_rewards: List[kingsburg.Reward]) -> Optional[kingsburg.Reward]:
+        scored_choices = []
+        for c in possible_rewards:
+            new_state = state.giveReward(self.name, advisorScore, c)
+            inp = training.state_to_input(new_state)
+            prediction = self.model.predict(numpy.asarray([inp]))[0]
+            scored_choices.append((prediction, c))
+        return util.pick_best(scored_choices)
+
+    def chooseBuilding(self, state: kingsburg.State, choices: List[kingsburg.Building], use_kings_envoy: bool) -> kingsburg.Building:
+        scored_choices = []
+        for c in choices:
+            new_state = state.giveBuilding(self.name, c, use_kings_envoy)
+            inp = training.state_to_input(new_state)
+            prediction = self.model.predict(numpy.asarray([inp]))[0]
+            scored_choices.append((prediction, c))
+        return util.pick_best(scored_choices)

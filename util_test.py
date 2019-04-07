@@ -369,3 +369,12 @@ def test_list_minus():
     list1 = [1, 2, 3]
     list2 = [1, 2, 3]
     assert util.list_minus(list1, list2) == []
+
+def test_pick_best():
+    input = [(10, "fred"), (5, "george"), (3, "ron")]
+    got = util.pick_best(input)
+    assert got == "fred"
+
+    input = [(1, "fred"), (5, "george"), (3, "ron")]
+    got = util.pick_best(input)
+    assert got == "george"
