@@ -27,6 +27,9 @@ def ident():
     return str(unix) + "-" + str(rand)
 
 # TODO should start games at a random state rather than beginning
+# TODO in addition to this, test the effect of having more than one output
+# TODO maybe look at under/over fitting as well
+# TODO does randomplayer ever need to pass unnecessarily? it may on buildings, not on influence
 
 if __name__ == "__main__":
     if len(sys.argv) != 4:
@@ -41,13 +44,17 @@ if __name__ == "__main__":
     mkdir_p(dir)
 
     output = ""
-    for i in range(1, num):
+    for i in range(1, num+1):
         l = logger.SilentLogger()
         eng = engine.TrainingDataEngine(l)
         state = kingsburg.State()
         g = game.Game(eng, kingsburg.State())
         g.play()
-        game_json = json.dumps({"states": eng.states, "won": eng.won(g.state)})
+        game_json = json.dumps({
+            "states": [state.toDict() for state in eng.states],
+            "advisor_choices": [[choice[0].toDict(), choice[1]] for choice in eng.advisor_choices],
+            "won": eng.won(g.state)
+        })
         output += game_json + "\n"
         if i % batchsize == 0:
             filename = dir + "/" + ident()
@@ -55,3 +62,4 @@ if __name__ == "__main__":
             f.write(output)
             f.close()
             output = ""
+        print(i)

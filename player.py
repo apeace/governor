@@ -119,9 +119,10 @@ class RandomPlayer(Player):
         choices = [c for c in choices if c != kingsburg.BUILD_PASS]
         return random.choice(choices)
 
-class GovPlayer(RandomPlayer):
+class GovAlphaPlayer(RandomPlayer):
     """
     The Governor.
+    The very first version where I was just messing around.
     """
 
     def __init__(self, name, filename):
@@ -177,3 +178,31 @@ class GovPlayer(RandomPlayer):
         chosen = util.pick_best(scored_choices)
         print("Score: " + str(chosen[0]))
         return chosen[1]
+
+class GovAlpha2Player(RandomPlayer):
+    """
+    The Governor.
+    The second version where I tried a different neural net.
+
+    Currently makes random choices for everything except placing dice.
+    TODO: All other choices.
+    """
+
+    def __init__(self, name, filename):
+        Player.__init__(self, name)
+        self.advisor_chooser = keras.models.load_model(filename + '_advisor_chooser')
+
+    def chooseAdvisor(self, state: kingsburg.State) -> kingsburg.AdvisorInfluence:
+        choices = state.choices__advisorInfluence(self.name)
+        best_choice = None
+        best_choice_score = None
+        base_inputs = training.state_to_input(state)
+        for c in choices:
+            additional_inputs = training.advisor_choice_to_input(state, c)
+            inputs = base_inputs + additional_inputs
+            prediction = self.advisor_chooser.predict(numpy.asarray([inputs]))[0][0]
+            if best_choice_score is None or prediction > best_choice_score:
+                best_choice_score = prediction
+                best_choice = c
+        print("Score: " + str(best_choice_score))
+        return best_choice

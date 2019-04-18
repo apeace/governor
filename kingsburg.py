@@ -41,6 +41,13 @@ class Reward():
     def __eq__(self, other):
         return self.__dict__ == other.__dict__
 
+    @staticmethod
+    def fromDict(d) -> Optional[Reward]:
+        if d is None:
+            return None
+        # TODO
+        return None
+
 # A lookup of the possible resource inventories you can get based on
 # a reward of "receive_any_resource" of the given amount.
 # I was too lazy to write code to generate these.
@@ -332,6 +339,18 @@ class AdvisorInfluence():
 
     def __eq__(self, other):
         return self.__dict__ == other.__dict__
+
+    def toDict(self):
+        return self.__dict__
+
+    @staticmethod
+    def fromDict(d) -> AdvisorInfluence:
+        player_dice = d["player_dice"]
+        bonus_dice = d["bonus_dice"]
+        plus_two = d["plus_two"]
+        market_modifier = d["market_modifier"]
+        reward = Reward.fromDict(d["reward"])
+        return AdvisorInfluence(player_dice, bonus_dice, plus_two, market_modifier, reward)
 
     def advisorScore(self) -> AdvisorScore:
         total = 0

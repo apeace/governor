@@ -21,9 +21,10 @@ if __name__ == "__main__":
     files = os.listdir(dir)
     files = [dir + "/" + f for f in files if os.path.isfile(dir + "/" + f)]
 
-    states = []
-    wins = []
+    advisor_chooser_inputs = []
+    advisor_chooser_outputs = []
 
+    print("Loading data...")
     stop = False
     count = 0
     for file in files:
@@ -36,20 +37,22 @@ if __name__ == "__main__":
                     stop = True
                     break
                 d = json.loads(line)
-                for state in d["states"]:
-                    s = kingsburg.State().fromDict(state)
-                    input = training.state_to_input(s)
-                    assert len(input) == 167
-                    states.append(input)
-                    wins.append(s.players["fred"].victory_points)
-                    # wins.append(d["won"])
-                count += 1
+                states = [kingsburg.State().fromDict(s) for s in d["states"]]
+                for choice in d["advisor_choices"]:
+                    # Structure of each element is (advisor_influence, state_idx)
+                    influence = kingsburg.AdvisorInfluence.fromDict(choice[0])
+                    s = states[choice[1]]
+                    base_input = training.state_to_input(s)
+                    influence_input = training.advisor_choice_to_input(s, influence)
+                    advisor_chooser_inputs.append(base_input + influence_input)
+                    advisor_chooser_outputs.append([int(d["won"]), 1-int(d["won"])])
 
-    model = keras.models.Sequential()
-    model.add(keras.layers.Dense(1000, input_dim=167, activation="relu"))
-    model.add(keras.layers.Dense(1000, activation='relu'))
-    model.add(keras.layers.Dense(1000, activation='relu'))
-    model.add(keras.layers.Dense(1, activation="linear", kernel_initializer="glorot_uniform"))
-    model.compile(loss="mean_squared_error", optimizer="adam", metrics=["accuracy"])
-    model.fit(numpy.asarray(states), numpy.asarray(wins), verbose=False)
-    model.save(out)
+    print("Training...")
+    advisor_chooser_model = keras.models.Sequential()
+    advisor_chooser_model.add(keras.layers.Dense(1000, input_dim=516, activation="relu"))
+    advisor_chooser_model.add(keras.layers.Dense(1000, activation='relu'))
+    advisor_chooser_model.add(keras.layers.Dense(1000, activation='relu'))
+    advisor_chooser_model.add(keras.layers.Dense(2, activation="linear", kernel_initializer="glorot_uniform"))
+    advisor_chooser_model.compile(loss="mean_squared_error", optimizer="adam", metrics=["accuracy"])
+    advisor_chooser_model.fit(numpy.asarray(advisor_chooser_inputs), numpy.asarray(advisor_chooser_outputs), verbose=True)
+    advisor_chooser_model.save(out + '_advisor_chooser')
